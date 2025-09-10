@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { dbConnect } from './config/db.js';
 import { errorHandler } from './middleware/ErrorHandler.js';
+import authRoute from "./routes/auth_route.js"
+import userRoute from "./routes/user_route.js"
 
 // Connect to the database
 dbConnect();
@@ -18,11 +20,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
+// Routes
+app.use('/api/v1/auth/users', authRoute);
+app.use('/api/v1/users', userRoute);
+
+
 app.get('/', (req, res) => {
     res.send('Hello, World! This is the backend for the Task Manager application.');
 })
 
 // Error 404 handler
+// app.all(('*', (req, res) => {
+//     res.status(404).json({ message: 'Page not found' });
+// }))
 app.use(('*', (req, res) => {
     res.status(404).json({ message: 'Page not found' });
 }))

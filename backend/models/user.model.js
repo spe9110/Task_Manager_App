@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const userSchema = new Schema({
+const userThreeSchema = new Schema({
     username: {
         type: String,
         required: true, 
@@ -15,6 +15,26 @@ const userSchema = new Schema({
     },
     avatar: {
         type: String,
+    },
+    verifyOtp: {
+        type: String,
+        default: ''
+    },
+    verifyOtpExpireAt: {
+        type: Number,
+        default: 0
+    },
+    isAccountVerified: {
+        type: Boolean,
+        default: false
+    },
+    resetOtp: {
+        type: String,
+        default: ''
+    },
+    resetOtpExpireAt: {
+        type: Number,
+        default: 0
     }
 },
 {
@@ -22,6 +42,6 @@ const userSchema = new Schema({
 }
 );
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model("UserThree", userThreeSchema);
 
 export default User;
