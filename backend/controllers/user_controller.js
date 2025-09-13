@@ -69,10 +69,33 @@ export const getSingleUser = async (req, res, next) => {
 export const updateAccount = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const { username, avatar } = req.body;
+
+        // Ensure user is updating their own account
+        if (id !== req.user.id) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: "No user found" });
+        }
+
+        const updates = {};
+        if (username) updates.username = username;
+        if (avatar) updates.avatar = avatar;
+
+        const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
+
+        // Remove sensitive fields
+        const { password, verifyOtp, resetOtp, ...safeUser } = updatedUser.toObject();
+
+        return res.status(200).json({ message: "User updated successfully", data: safeUser });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
-}
+};
+
 
 
 // @desc This API is used to delete a user profile
