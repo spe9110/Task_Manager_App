@@ -85,7 +85,7 @@ export const loginAccount = async (req, res, next) => {
         }
 
         // step 6 - sign the token
-        const accessToken = jwt.sign(payload, secretOrKey, { expiresIn: '15m' }); 
+        const accessToken = jwt.sign(payload, secretOrKey, { expiresIn: '7d' }); 
      
         // step 7 - cookie to store the token
         res.cookie('AccessToken', accessToken, {
@@ -105,7 +105,7 @@ export const loginAccount = async (req, res, next) => {
             avatar: user.avatar
         })
     } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
+        next(error)
     }
 }
 
@@ -127,6 +127,183 @@ export const logoutAccount = async (req, res, next) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 }
+
+// send verification OTP to the user's email
+export const sendOtpVerificationEmail = async (req, res, next) => {
+  try {
+    const userId = req.user; // Assuming user is set in the request by an authentication middleware
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+        return next({ status: 404, message: "User not found" });
+    }
+
+    if (user.isAccountVerified) {
+        return next({ status: 400, message: "Account is already verified." });
+    }
+
+    // Generate a random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save the OTP and expiration time to the user's document
+    user.verifyOtp = otp;
+    user.verifyOtpExpireAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    await user.save();
+
+    // Send the OTP to the user's email
+    const mailOptions = {
+      from: {
+        name: "Spencer Wawaku",
+        address: process.env.EMAIL_SENDER
+      },
+      to: user.email,
+      subject: "Email Verification OTP",
+      // text: `Hello ${user.name || ""},\n\nYour OTP for email verification is: ${otp}\n\nPlease use this OTP to verify your email address.\n\nBest regards,\nMERN Auth Team`,
+      html: EMAIL_TEMPLATE
+        .replace("{{otp}}", otp)
+        .replace("{{email}}", user.email)
+        .replace("{{name}}", user.name)
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({ success: true, message: "Verification email sent successfully." });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ---------------------------
+// Verify Email with OTP
+// ---------------------------
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { otp } = req.body;
+
+    if (!otp) return next({ status: 400, message: "OTP is required." });
+
+    const userId = req.user; // Assuming user is set in the request by authentication middleware
+    const user = await User.findById(userId);
+
+    if (!user) return next({ status: 404, message: "User not found." });
+
+    // Check if OTP is correct
+    if (!user.verifyOtp || user.verifyOtp !== otp)
+      return next({ status: 400, message: "Invalid OTP." });
+
+    // Check if OTP has expired
+    if (!user.verifyOtpExpireAt || user.verifyOtpExpireAt < Date.now())
+      return next({ status: 400, message: "OTP has expired." });
+
+    // Mark the account as verified
+    user.isAccountVerified = true;
+    user.verifyOtp = ""; // Clear OTP
+    user.verifyOtpExpireAt = 0;
+    await user.save();
+
+    return res.status(200).json({ success: true, message: "Email verified successfully."});
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ---------------------------
+// Check Authentication
+// ---------------------------
+export const isAuthenticated = (req, res, next) => {
+  try {
+    return res.status(200).json({
+      success: true,
+      message: "User is authenticated",
+      userId: req.user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ---------------------------
+// Send Password Reset OTP
+// ---------------------------
+export const PasswordResetEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) return next({ status: 400, message: "Email is required." });
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) return next({ status: 404, message: "User not found." });
+
+    // Generate a random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP and expiration
+    user.resetOtp = otp;
+    user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000; // 15 min
+    await user.save();
+
+    // Send OTP via email
+    const mailOptions = {
+      from: {
+        name: "Spencer Wawaku",
+        address: process.env.EMAIL_SENDER,
+      },
+      to: user.email,
+      subject: "Password Reset OTP",
+      html: PASSWORD_RESET_TEMPLATE
+        .replace("{{otp}}", otp)
+        .replace("{{email}}", user.email)
+        .replace("{{name}}", user.name),
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP was sent to your email address.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ---------------------------
+// Reset Password
+// ---------------------------
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword)
+      return next({
+        status: 400,
+        message: "Email, OTP, and new password are required.",
+      });
+
+    const user = await User.findOne({ email });
+    if (!user) return next({ status: 404, message: "User not found." });
+
+    if (!user.resetOtp || user.resetOtp !== otp)
+      return next({ status: 400, message: "Invalid OTP." });
+
+    if (!user.resetOtpExpireAt || user.resetOtpExpireAt < Date.now())
+      return next({ status: 400, message: "OTP has expired." });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    user.resetOtp = "";
+    user.resetOtpExpireAt = 0;
+    await user.save();
+
+    return res
+      .status(200).json({ success: true, message: "Password reset successfully." });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /*
 When deploying to production, consider these additional practices:

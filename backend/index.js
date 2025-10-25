@@ -41,9 +41,6 @@ app.get('/metrics', async (req, res) => {
 });
 
 // Error 404 handler
-// app.all(('*', (req, res) => {
-//     res.status(404).json({ message: 'Page not found' });
-// }))
 app.use(('*', (req, res) => {
     res.status(404).json({ message: 'Page not found' });
 }))
