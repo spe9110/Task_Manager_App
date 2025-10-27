@@ -1,5 +1,6 @@
 import express from "express";
 import { getAllUsers, getCurrentUser, getSingleUser, updateAccount, deleteAccount } from "../controllers/user_controller.js";
+import { authenticate } from "../middleware/authenticate.js";
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ router.get('/', getAllUsers);
 // @desc This API is used to fetch list of users
 // endpoint POST /api/v1/users/ 
 // access PRIVATE
-router.get('/current', getCurrentUser);
+router.get('/current', authenticate, getCurrentUser);
 
 // @desc This API is used to fetch list of users
 // endpoint POST /api/v1/users/ 
