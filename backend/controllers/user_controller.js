@@ -26,6 +26,7 @@ export const getAllUsers = async (req, res, next) => {
 export const getCurrentUser = async (req, res, next) => {
     try {
         // Assuming req.user is set by authentication middleware
+       
         if (!req.user) {
             return res.status(401).json({ message: "Unauthorized" });
         }

@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import { secretOrKey } from '../config/key.js';
 
-export const userAuth = (req, res, next) => {
+export const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   // Get token from either cookies or Authorization header
@@ -14,7 +15,7 @@ export const userAuth = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, secretOrKey);
 
     if (!decoded.id) {
       return next({ status: 401, message: "Invalid token. Not authorized!" });

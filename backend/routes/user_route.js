@@ -14,6 +14,7 @@ router.get('/', getAllUsers);
 // access PRIVATE
 router.get('/current', authenticate, getCurrentUser);
 
+
 // @desc This API is used to fetch list of users
 // endpoint POST /api/v1/users/ 
 // access PRIVATE

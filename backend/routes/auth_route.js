@@ -24,4 +24,5 @@ router.post('/logout', logoutAccount);
 // access PUBLIC
 router.post('/send-otp-verify', authenticate, sendOtpVerificationEmail)
 
+
 export default router
