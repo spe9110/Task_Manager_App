@@ -24,23 +24,23 @@ export const getAllUsers = async (req, res, next) => {
 // endpoint GET /api/v1/users/current
 // access PRIVATE
 export const getCurrentUser = async (req, res, next) => {
-    try {
-        // Assuming req.user is set by authentication middleware
-       
-        if (!req.user) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
-        // Return the current user's details
-        res.status(200).json({
-            id: req.user.id,
-            username: req.user.username,
-            email: req.user.email,
-            isAccountVerified: req.user.isAccountVerified
-        });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
-    }
-}
+  try {
+    const authHeader = req?.headers?.authorization;
+
+  // Get token from either cookies or Authorization header
+  const token = req.cookies?.AccessToken || 
+  (authHeader && authHeader?.startsWith('Bearer ') && authHeader?.split(' ')[1]);
+    console.log("✅ getCurrentUser req.user:", token); // Debug log
+    return res.status(200).json({
+        success: true,
+        user: req.user
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 
 // @desc This API is used to fetch single user
 // endpoint GET /api/v1/users/:id

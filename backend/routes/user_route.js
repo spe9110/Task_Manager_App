@@ -1,24 +1,24 @@
 import express from "express";
 import { getAllUsers, getCurrentUser, getSingleUser, updateAccount, deleteAccount } from "../controllers/user_controller.js";
-import { authenticate } from "../middleware/authenticate.js";
+import { userAuth } from "../middleware/authenticate.js";
 
 const router = express.Router();
 
 // @desc This API is used to fetch list of users
 // endpoint POST /api/v1/users/ 
 // access PUBLIC
-router.get('/', getAllUsers);
+router.get('/', userAuth, getAllUsers);
+
+// @desc This API is used to fetch list of users
+// endpoint POST /api/v1/users/current
+// access PRIVATE
+router.get('/current', userAuth, getCurrentUser);
+
 
 // @desc This API is used to fetch list of users
 // endpoint POST /api/v1/users/ 
 // access PRIVATE
-router.get('/current', authenticate, getCurrentUser);
-
-
-// @desc This API is used to fetch list of users
-// endpoint POST /api/v1/users/ 
-// access PRIVATE
-router.get('/:id', getSingleUser);
+router.get('/:id', userAuth, getSingleUser);
 
 // @desc This API is used to update user profile
 // endpoint POST /api/v1/users/update/:id

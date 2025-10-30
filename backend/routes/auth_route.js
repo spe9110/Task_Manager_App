@@ -1,6 +1,6 @@
 import express from "express";
 import { createAccount, loginAccount, logoutAccount, sendOtpVerificationEmail } from "../controllers/auth_controller.js";
-import { authenticate } from "../middleware/authenticate.js";
+import { userAuth } from '../middleware/authenticate.js'
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ router.post('/logout', logoutAccount);
 // // @desc This API is used to logout from user account
 // endpoint POST /api/v1/auth/users/logout 
 // access PUBLIC
-router.post('/send-otp-verify', authenticate, sendOtpVerificationEmail)
+router.post('/send-otp-verify', userAuth, sendOtpVerificationEmail)
 
 
 export default router

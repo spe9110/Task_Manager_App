@@ -16,7 +16,7 @@ export const createAccount = async (req, res, next) => {
         if(error) return res.status(400).json({ error: error.details[0].message})
         
         // step 2 - get data
-        const { username, email, password, password_confirm, avatar } = req.body;
+        const { username, email, password, password_confirm, avatar, role } = req.body;
 
         // step 3 - check if the user is already
         const isUserExist = await User.findOne({ email });
@@ -39,6 +39,7 @@ export const createAccount = async (req, res, next) => {
         const newUser = await User.create({
             username,
             email,
+            role,
             password: hashedPassword,
             avatar: avatarUrl,  // Use the generated gravatar URL
         });
@@ -85,7 +86,7 @@ export const loginAccount = async (req, res, next) => {
         }
 
         // step 6 - sign the token
-        const accessToken = jwt.sign(payload, secretOrKey, { expiresIn: '7d' }); 
+        const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }); 
      
         // step 7 - cookie to store the token
         res.cookie('AccessToken', accessToken, {
@@ -152,7 +153,7 @@ export const sendOtpVerificationEmail = async (req, res, next) => {
     await user.save();
 
     // Send the OTP to the user's email
-    const mailOptions = {
+    /*const mailOptions = {
       from: {
         name: "Spencer Wawaku",
         address: process.env.EMAIL_SENDER
@@ -167,7 +168,7 @@ export const sendOtpVerificationEmail = async (req, res, next) => {
     };
 
     await transporter.sendMail(mailOptions);
-
+    */
     return res.status(200).json({ success: true, message: "Verification email sent successfully." });
 
   } catch (error) {

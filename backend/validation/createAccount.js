@@ -5,4 +5,5 @@ export const createAccountSchema = Joi.object({
     email: Joi.string().email().trim().required(),
     password: Joi.string().min(8).max(250).pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$')).required(),
     password_confirm: Joi.any().valid(Joi.ref('password')).required(),
+    role: Joi.string().trim().valid('user', 'admin').default('user').optional(), 
 });
