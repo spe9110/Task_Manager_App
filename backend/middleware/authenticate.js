@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import logger from "../config/logging.js";
 
 export const userAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -9,6 +10,7 @@ export const userAuth = (req, res, next) => {
     (authHeader && authHeader.startsWith("Bearer ") && authHeader.split(" ")[1]);
 
   if (!token) {
+    logger.info("userAuth - no token provided", { path: req.path, method: req.method });
     req.user = null; // mark as not logged in
     return next();
   }
@@ -18,14 +20,17 @@ export const userAuth = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!decoded?.id) {
+      logger.warn("userAuth - token invalid: no user id", { token });
       return next({ status: 401, message: "Invalid token. Not authorized!" });
     }
 
     // Attach the decoded user ID to request object
     req.user = decoded.id;
+    logger.info("userAuth - token verified successfully", { userId: decoded.id });
 
     return next();
   } catch (error) {
+    logger.error("userAuth - token verification failed", { error: error.message, token });
     return next({ status: 403, message: "Invalid or expired token." });
   }
 };

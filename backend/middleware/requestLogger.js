@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import promClient from "prom-client";
 import logger from "../config/logging.js";
 
-// Prometheus metrics
+// 🧠 Prometheus metrics
 const httpDuration = new promClient.Histogram({
   name: "http_request_duration_seconds",
   help: "Duration of HTTP requests in seconds",
@@ -22,8 +22,9 @@ const httpErrors = new promClient.Counter({
   labelNames: ["method", "route"],
 });
 
-const activeUsers = new Set(); // Track unique active user IDs in memory
+const activeUsers = new Set(); // 👥 Track unique active users in memory
 
+// 🔒 Fonction pour supprimer les champs sensibles
 function scrub(obj) {
   if (!obj || typeof obj !== "object") return obj;
   const clone = Array.isArray(obj) ? [...obj] : { ...obj };
@@ -34,40 +35,63 @@ function scrub(obj) {
   return clone;
 }
 
+// 🧾 Middleware principal
 const requestLogger = (req, res, next) => {
-  const requestId = uuidv4();
-  const start = process.hrtime();
-  const safeBody = scrub(req.body);
-  const bodySize = Buffer.byteLength(JSON.stringify(safeBody));
+  try {
+    const requestId = uuidv4();
+    const start = process.hrtime();
 
-  if (req.user?.id) activeUsers.add(req.user.id);
+    const safeBody = scrub(req.body);
 
-  req.requestId = requestId;
+    // ✅ Correction : évite les erreurs quand req.body est undefined
+    const bodyString =
+      safeBody && Object.keys(safeBody).length > 0
+        ? JSON.stringify(safeBody)
+        : "";
+    const bodySize = Buffer.byteLength(bodyString, "utf8");
 
-  logger.info("HTTP request start", {
-    request_id: requestId,
-    method: req.method,
-    route: req.path,
-    user_id: req.user ? req.user.id : "anonymous",
-    body_size_bytes: bodySize,
-  });
+    // 👤 Enregistre l’utilisateur actif si présent
+    if (req.user?.id) activeUsers.add(req.user.id);
 
-  res.on("finish", () => {
-    const diff = process.hrtime(start);
-    const durationSec = diff[0] + diff[1] / 1e9;
+    req.requestId = requestId;
 
-    httpDuration.labels(req.method, req.path, String(res.statusCode)).observe(durationSec);
-    httpRequests.labels(req.method, req.path, String(res.statusCode)).inc();
-    if (res.statusCode >= 400) httpErrors.labels(req.method, req.path).inc();
-
-    logger.info("HTTP request end", {
+    logger.info("HTTP request start", {
       request_id: requestId,
-      status_code: res.statusCode,
-      duration: `${durationSec.toFixed(3)}s`,
+      method: req.method,
+      route: req.path,
+      user_id: req.user ? req.user.id : "anonymous",
+      body_size_bytes: bodySize,
     });
-  });
 
-  next();
+    // 🕒 Mesure du temps et enregistrement à la fin
+    res.on("finish", () => {
+      const diff = process.hrtime(start);
+      const durationSec = diff[0] + diff[1] / 1e9;
+
+      httpDuration
+        .labels(req.method, req.path, String(res.statusCode))
+        .observe(durationSec);
+      httpRequests
+        .labels(req.method, req.path, String(res.statusCode))
+        .inc();
+      if (res.statusCode >= 400)
+        httpErrors.labels(req.method, req.path).inc();
+
+      logger.info("HTTP request end", {
+        request_id: requestId,
+        status_code: res.statusCode,
+        duration: `${durationSec.toFixed(3)}s`,
+      });
+    });
+
+    next();
+  } catch (error) {
+    logger.error("Error in requestLogger middleware", {
+      error: error.message,
+      stack: error.stack,
+    });
+    next(error);
+  }
 };
 
 export { requestLogger, activeUsers, httpRequests, httpDuration, httpErrors };

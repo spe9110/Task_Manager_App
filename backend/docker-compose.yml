@@ -13,6 +13,7 @@ services:
   server:
     build:
       context: .
+    container_name: task_manager_backend
     environment:
       - NODE_ENV=development
       - MONGO_URI=mongodb://mongo:27017/TASK_MANAGER
@@ -22,6 +23,9 @@ services:
       - .env
     depends_on:
       - mongo
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
 
 volumes:
   mongo-data:

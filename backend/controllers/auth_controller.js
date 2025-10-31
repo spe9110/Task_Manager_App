@@ -5,31 +5,32 @@ import { createAccountSchema } from "../validation/createAccount.js";
 import { loginAccountSchema } from "../validation/loginAccount.js";
 import gravatar from 'gravatar';
 import { secretOrKey } from "../config/key.js";
-
 // @desc This API is used to create a user account
 // endpoint POST /api/v1/auth/users/create 
 // access PUBLIC
 export const createAccount = async (req, res, next) => {
     try {
+        logger.info("createAccount - start", { route: req.originalUrl, method: req.method, body: req.body });
+
         // step 1 - Validate request body
         const { error } = createAccountSchema.validate(req.body, { abortEarly: false });
-        if(error) return res.status(400).json({ error: error.details[0].message})
+        if(error) {
+            logger.warn("createAccount - validation failed", { error: error.details[0].message });
+            return res.status(400).json({ error: error.details[0].message });
+        }
         
         // step 2 - get data
         const { username, email, password, password_confirm, avatar, role } = req.body;
 
-        // step 3 - check if the user is already
+        // step 3 - check if the user already exists
         const isUserExist = await User.findOne({ email });
         if (isUserExist) {
+            logger.warn("createAccount - user already exists", { email });
             return next({ status: 400, message: "User already exists." });
         }
         
         // step 4 - Generate gravatar URL
-        const avatarUrl = gravatar.url(email, {
-            s: '200',  // Size of avatar
-            r: 'pg',   // Rating
-            d: 'mm'    // Default
-        });
+        const avatarUrl = gravatar.url(email, { s: '200', r: 'pg', d: 'mm' });
 
         // step 5 - Hash the password
         const salt = await bcrypt.genSalt(10);
@@ -41,62 +42,70 @@ export const createAccount = async (req, res, next) => {
             email,
             role,
             password: hashedPassword,
-            avatar: avatarUrl,  // Use the generated gravatar URL
+            avatar: avatarUrl,
         });
 
         // step 7 - remove password from the response
         newUser.password = undefined;
 
+        logger.info("createAccount - user created successfully", { userId: newUser._id, email });
+
         // step 8 - return the response
         return res.status(201).json({ success: true, message: "User created successfully", user: newUser });
     } catch (error) {
+        logger.error("createAccount - error", { error: error.message });
         return res.status(500).json({ success: false, message: error.message });
     }
 }
 
-// @desc This API is used to create a user account
-// endpoint POST post('/create) 
+// @desc This API is used to login a user
+// endpoint POST /api/v1/auth/login 
 // access PUBLIC
 export const loginAccount = async (req, res, next) => {
     try {
+        logger.info("loginAccount - start", { route: req.originalUrl, method: req.method, body: req.body });
+
         // step 1 - Validate request body
         const { error } = loginAccountSchema.validate(req.body, { abortEarly: false });
-        if(error) return res.status(400).json({ error: error.details[0].message})
+        if(error) {
+            logger.warn("loginAccount - validation failed", { error: error.details[0].message });
+            return res.status(400).json({ error: error.details[0].message });
+        }
         
-        // step 2 - Destructure email and password from request body
+        // step 2 - Destructure email and password
         const { email, password } = req.body;
 
-        // step 3 - check if user exist
+        // step 3 - check if user exists
         const user = await User.findOne({ email });
         if(!user){
+            logger.warn("loginAccount - user not found", { email });
             return next({ status: 404, message: "User not found" });
         }
 
         // step 4 - Check if password matches
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if(!isPasswordMatch) {
+            logger.warn("loginAccount - invalid password", { email });
             return next({ status: 401, message: "Invalid password" });
         }
 
-        // step 5 - create a token for the user
-        const payload = {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-        }
+        // step 5 - create a token
+        const payload = { id: user._id, username: user.username, email: user.email };
 
         // step 6 - sign the token
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }); 
      
-        // step 7 - cookie to store the token
+        // step 7 - set cookie
         res.cookie('AccessToken', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
-            sameSite: 'Strict', // Prevent CSRF attacks
-            maxAge: 15 * 60 * 1000 // 15 minutes
-        })
+            secure: process.env.NODE_ENV !== 'development',
+            sameSite: 'Strict',
+            maxAge: 15 * 60 * 1000
+        });
         
-        // step 8 - response with user data and token
+        logger.info("loginAccount - user logged in successfully", { userId: user._id, email });
+
+        // step 8 - return response
         res.status(200).json({
             message: "User logged in successfully",
             token: accessToken,
@@ -104,74 +113,67 @@ export const loginAccount = async (req, res, next) => {
             username: user.username,
             email: user.email,
             avatar: user.avatar
-        })
+        });
     } catch (error) {
-        next(error)
+        logger.error("loginAccount - error", { error: error.message });
+        next(error);
     }
 }
 
-// @desc This API is used to create a user account
-// endpoint POST post('/create) 
+// @desc This API is used to logout a user
+// endpoint POST /api/v1/auth/logout 
 // access PUBLIC
 export const logoutAccount = async (req, res, next) => {
     try {
-         // Clear the cookie
+        logger.info("logoutAccount - start", { route: req.originalUrl, method: req.method, userId: req.user?.id || "anonymous" });
+
+        // Clear the cookie
         res.clearCookie('AccessToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV !== 'development',
             sameSite: 'Strict'
         });
         
-        res.status(200).json({ message: "User logged out successfully" });
+        logger.info("logoutAccount - user logged out successfully", { userId: req.user?.id || "anonymous" });
 
+        res.status(200).json({ message: "User logged out successfully" });
     } catch (error) {
+        logger.error("logoutAccount - error", { error: error.message });
         return res.status(500).json({ success: false, message: error.message });
     }
 }
-
 // send verification OTP to the user's email
 export const sendOtpVerificationEmail = async (req, res, next) => {
   try {
-    const userId = req.user; // Assuming user is set in the request by an authentication middleware
+    const userId = req.user;
+    logger.info("sendOtpVerificationEmail - start", { userId });
 
     // Find the user by ID
     const user = await User.findById(userId);
     if (!user) {
+        logger.warn("sendOtpVerificationEmail - user not found", { userId });
         return next({ status: 404, message: "User not found" });
     }
 
     if (user.isAccountVerified) {
+        logger.warn("sendOtpVerificationEmail - account already verified", { userId });
         return next({ status: 400, message: "Account is already verified." });
     }
 
     // Generate a random 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Save the OTP and expiration time to the user's document
     user.verifyOtp = otp;
     user.verifyOtpExpireAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
     await user.save();
 
-    // Send the OTP to the user's email
-    /*const mailOptions = {
-      from: {
-        name: "Spencer Wawaku",
-        address: process.env.EMAIL_SENDER
-      },
-      to: user.email,
-      subject: "Email Verification OTP",
-      // text: `Hello ${user.name || ""},\n\nYour OTP for email verification is: ${otp}\n\nPlease use this OTP to verify your email address.\n\nBest regards,\nMERN Auth Team`,
-      html: EMAIL_TEMPLATE
-        .replace("{{otp}}", otp)
-        .replace("{{email}}", user.email)
-        .replace("{{name}}", user.name)
-    };
+    logger.info("sendOtpVerificationEmail - OTP saved successfully", { userId, otp });
 
-    await transporter.sendMail(mailOptions);
-    */
+    // Email sending commented out, but can log intent
+    logger.info("sendOtpVerificationEmail - OTP email ready to send", { userEmail: user.email });
+
     return res.status(200).json({ success: true, message: "Verification email sent successfully." });
-
   } catch (error) {
+    logger.error("sendOtpVerificationEmail - error", { error: error.message });
     next(error);
   }
 };
@@ -182,30 +184,40 @@ export const sendOtpVerificationEmail = async (req, res, next) => {
 export const verifyEmail = async (req, res, next) => {
   try {
     const { otp } = req.body;
+    const userId = req.user;
+    logger.info("verifyEmail - start", { userId, otp });
 
-    if (!otp) return next({ status: 400, message: "OTP is required." });
+    if (!otp) {
+      logger.warn("verifyEmail - OTP not provided", { userId });
+      return next({ status: 400, message: "OTP is required." });
+    }
 
-    const userId = req.user; // Assuming user is set in the request by authentication middleware
     const user = await User.findById(userId);
+    if (!user) {
+      logger.warn("verifyEmail - user not found", { userId });
+      return next({ status: 404, message: "User not found." });
+    }
 
-    if (!user) return next({ status: 404, message: "User not found." });
-
-    // Check if OTP is correct
-    if (!user.verifyOtp || user.verifyOtp !== otp)
+    if (!user.verifyOtp || user.verifyOtp !== otp) {
+      logger.warn("verifyEmail - invalid OTP", { userId, otp });
       return next({ status: 400, message: "Invalid OTP." });
+    }
 
-    // Check if OTP has expired
-    if (!user.verifyOtpExpireAt || user.verifyOtpExpireAt < Date.now())
+    if (!user.verifyOtpExpireAt || user.verifyOtpExpireAt < Date.now()) {
+      logger.warn("verifyEmail - OTP expired", { userId });
       return next({ status: 400, message: "OTP has expired." });
+    }
 
-    // Mark the account as verified
     user.isAccountVerified = true;
-    user.verifyOtp = ""; // Clear OTP
+    user.verifyOtp = "";
     user.verifyOtpExpireAt = 0;
     await user.save();
 
-    return res.status(200).json({ success: true, message: "Email verified successfully."});
+    logger.info("verifyEmail - email verified successfully", { userId });
+
+    return res.status(200).json({ success: true, message: "Email verified successfully." });
   } catch (error) {
+    logger.error("verifyEmail - error", { error: error.message });
     next(error);
   }
 };
@@ -215,27 +227,37 @@ export const verifyEmail = async (req, res, next) => {
 // ---------------------------
 export const isAuthenticated = (req, res, next) => {
   try {
+    const userId = req.user;
+    logger.info("isAuthenticated - check", { userId });
     return res.status(200).json({
       success: true,
       message: "User is authenticated",
-      userId: req.user,
+      userId,
     });
   } catch (error) {
+    logger.error("isAuthenticated - error", { error: error.message });
     next(error);
   }
 };
-
 // ---------------------------
 // Send Password Reset OTP
 // ---------------------------
 export const PasswordResetEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
-    if (!email) return next({ status: 400, message: "Email is required." });
+    logger.info("PasswordResetEmail - start", { email });
+
+    if (!email) {
+      logger.warn("PasswordResetEmail - email not provided");
+      return next({ status: 400, message: "Email is required." });
+    }
 
     // Find user
     const user = await User.findOne({ email });
-    if (!user) return next({ status: 404, message: "User not found." });
+    if (!user) {
+      logger.warn("PasswordResetEmail - user not found", { email });
+      return next({ status: 404, message: "User not found." });
+    }
 
     // Generate a random 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -244,6 +266,8 @@ export const PasswordResetEmail = async (req, res, next) => {
     user.resetOtp = otp;
     user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000; // 15 min
     await user.save();
+
+    logger.info("PasswordResetEmail - OTP saved successfully", { email, otp });
 
     // Send OTP via email
     const mailOptions = {
@@ -260,12 +284,14 @@ export const PasswordResetEmail = async (req, res, next) => {
     };
 
     await transporter.sendMail(mailOptions);
+    logger.info("PasswordResetEmail - OTP email sent successfully", { email });
 
     return res.status(200).json({
       success: true,
       message: "OTP was sent to your email address.",
     });
   } catch (error) {
+    logger.error("PasswordResetEmail - error", { error: error.message });
     next(error);
   }
 };
@@ -276,20 +302,31 @@ export const PasswordResetEmail = async (req, res, next) => {
 export const resetPassword = async (req, res, next) => {
   try {
     const { email, otp, newPassword } = req.body;
-    if (!email || !otp || !newPassword)
+    logger.info("resetPassword - start", { email });
+
+    if (!email || !otp || !newPassword) {
+      logger.warn("resetPassword - missing parameters", { email });
       return next({
         status: 400,
         message: "Email, OTP, and new password are required.",
       });
+    }
 
     const user = await User.findOne({ email });
-    if (!user) return next({ status: 404, message: "User not found." });
+    if (!user) {
+      logger.warn("resetPassword - user not found", { email });
+      return next({ status: 404, message: "User not found." });
+    }
 
-    if (!user.resetOtp || user.resetOtp !== otp)
+    if (!user.resetOtp || user.resetOtp !== otp) {
+      logger.warn("resetPassword - invalid OTP", { email, otp });
       return next({ status: 400, message: "Invalid OTP." });
+    }
 
-    if (!user.resetOtpExpireAt || user.resetOtpExpireAt < Date.now())
+    if (!user.resetOtpExpireAt || user.resetOtpExpireAt < Date.now()) {
+      logger.warn("resetPassword - OTP expired", { email });
       return next({ status: 400, message: "OTP has expired." });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
@@ -299,9 +336,14 @@ export const resetPassword = async (req, res, next) => {
     user.resetOtpExpireAt = 0;
     await user.save();
 
-    return res
-      .status(200).json({ success: true, message: "Password reset successfully." });
+    logger.info("resetPassword - password reset successfully", { email });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully.",
+    });
   } catch (error) {
+    logger.error("resetPassword - error", { error: error.message });
     next(error);
   }
 };

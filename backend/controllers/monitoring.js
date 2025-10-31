@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { execSync } from "child_process";
 import { activeUsers } from "../middleware/requestLogger.js";
 import User from "../models/user.model.js";
+import logger from "../config/logging.js";
 
 async function getConnectionCount() {
   return new Promise((resolve) => {
@@ -19,6 +20,8 @@ async function getConnectionCount() {
 
 export const getMonitoringData = async (req, res) => {
   try {
+    logger.info("getMonitoringData - start monitoring request");
+
     const totalUsers = await User.countDocuments();
     const activeCount = activeUsers.size;
     const connectionCount = await getConnectionCount();
@@ -29,9 +32,14 @@ export const getMonitoringData = async (req, res) => {
     const loadavg = os.loadavg();
     const pid = process.pid;
 
-    const commitSHA = execSync("git rev-parse --short HEAD").toString().trim();
+    let commitSHA = "unknown";
+    try {
+      commitSHA = execSync("git rev-parse --short HEAD").toString().trim();
+    } catch (gitErr) {
+      logger.warn("getMonitoringData - git commit SHA not found", { error: gitErr.message });
+    }
 
-    res.json({
+    const data = {
       status: "ok",
       timestamp: new Date().toISOString(),
       totalUsers,
@@ -46,8 +54,13 @@ export const getMonitoringData = async (req, res) => {
       loadavg,
       pid,
       commit: commitSHA,
-    });
+    };
+
+    logger.info("getMonitoringData - monitoring data prepared", data);
+
+    res.json(data);
   } catch (err) {
+    logger.error("getMonitoringData - error fetching monitoring data", { error: err.message });
     res.status(500).json({ status: "error", message: err.message });
   }
 };
