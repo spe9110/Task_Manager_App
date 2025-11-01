@@ -5,6 +5,7 @@ import { createAccountSchema } from "../validation/createAccount.js";
 import { loginAccountSchema } from "../validation/loginAccount.js";
 import gravatar from 'gravatar';
 import { secretOrKey } from "../config/key.js";
+import logger from "../config/logging.js";
 // @desc This API is used to create a user account
 // endpoint POST /api/v1/auth/users/create 
 // access PUBLIC
@@ -145,7 +146,7 @@ export const logoutAccount = async (req, res, next) => {
 // send verification OTP to the user's email
 export const sendOtpVerificationEmail = async (req, res, next) => {
   try {
-    const userId = req.user;
+    const userId = req.user.id;
     logger.info("sendOtpVerificationEmail - start", { userId });
 
     // Find the user by ID
@@ -174,7 +175,7 @@ export const sendOtpVerificationEmail = async (req, res, next) => {
     return res.status(200).json({ success: true, message: "Verification email sent successfully." });
   } catch (error) {
     logger.error("sendOtpVerificationEmail - error", { error: error.message });
-    next(error);
+    next({status: 500, message: error.message});
   }
 };
 

@@ -7,7 +7,7 @@ const router = express.Router();
 // @desc This API is used to create a user account
 // endpoint POST /api/v1/auth/users/create 
 // access PUBLIC
-router.post('/create', createAccount);
+router.post('/register', createAccount);
 
 // @desc This API is used to login to user account
 // endpoint POST /api/v1/auth/users/login
