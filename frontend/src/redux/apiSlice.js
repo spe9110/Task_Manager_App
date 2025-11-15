@@ -4,7 +4,7 @@ import { logout } from './authSlice.js';
 
 // Base query configuration with error handling and authentication
 const baseQuery = fetchBaseQuery({
-    baseUrl: API_BASE_URL || 'http://localhost:4000', // Use environment variable for base URL
+    baseUrl: API_BASE_URL || 'http://localhost:5000', // Use environment variable for base URL
     credentials: 'include', // Include cookies or credentials
     prepareHeaders: (headers, { getState }) => {
         const token = getState().auth.userData?.token; // Fetch token from Redux state

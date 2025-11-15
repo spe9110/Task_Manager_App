@@ -5,21 +5,38 @@ import Layout from "./components/Layout"
 import PrivateRoute from "./components/PrivateRoute"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ErrorBoundary from "./components/ErrorBoundary"
+import VerifyEmail from "./pages/VerifyEmail"
+import ResetPassword from "./pages/ResetPassword"
 
 function App() {
 
   return (
     <div>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/" element={<Layout />}> 
-          <Route index element={<Home />} />
-          <Route element={<PrivateRoute />}>
-            <Route path="profile" element={<Profile />} />
+      <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          theme="colored"
+        />
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="reset-password" element={<ResetPassword />}/>
+          <Route path="/" element={<Layout />}> 
+            <Route index element={<Home />} />
+            <Route element={<PrivateRoute />}>
+              <Route path="profile" element={<Profile />} />
+              <Route path="/verify-email" element={<VerifyEmail/>} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </ErrorBoundary>
     </div>
   )
 }

@@ -40,14 +40,14 @@ const Signup = () => {
 
   useEffect(() => {
     if (userData) {
-      navigate('/signin');
+      navigate('/login');
     }
   }, [navigate, userData]);
 
   // ✅ Fonction appelée à la soumission du formulaire
-  const onSubmit = async ({ name, email, password, password_confirm }) => {
+  const onSubmit = async ({ username, email, password, password_confirm }) => {
     try {
-      const res = await registerUser({ name, email, password, password_confirm }).unwrap();
+      const res = await registerUser({ username, email, password, password_confirm }).unwrap();
       dispatch(setCredentials({ ...res }));
       reset(); // Réinitialiser le formulaire après l'inscription réussie
       toast.success('User registered successfully! Login now.');
@@ -79,13 +79,13 @@ const Signup = () => {
           {/* Name */}
           <div>
             <input
-              id="name"
+              id="username"
               type="text"
-              placeholder="Name"
-              className={`w-full rounded-md px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
-              {...register('name')}
+              placeholder="Username"
+              className={`w-full rounded-md px-3 py-2 border ${errors.username ? 'border-red-500' : 'border-gray-300'}`}
+              {...register('username')}
             />
-            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+            {errors.username && <p className="text-xs text-red-500 mt-1">{errors.username.message}</p>}
           </div>
 
           {/* Email */}
