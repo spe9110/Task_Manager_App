@@ -6,6 +6,7 @@ import { loginAccountSchema } from "../validation/loginAccount.js";
 import gravatar from 'gravatar';
 import { secretOrKey } from "../config/key.js";
 import logger from "../config/logging.js";
+
 // @desc This API is used to create a user account
 // endpoint POST /api/v1/auth/users/create 
 // access PUBLIC
@@ -184,10 +185,10 @@ export const sendOtpVerificationEmail = async (req, res, next) => {
 // ---------------------------
 export const verifyEmail = async (req, res, next) => {
   try {
+    const userId = req.user.id;
     const { otp } = req.body;
-    const userId = req.user;
     logger.info("verifyEmail - start", { userId, otp });
-
+    logger.info("verifyEmail - userId type", { userId, type: typeof userId });
     if (!otp) {
       logger.warn("verifyEmail - OTP not provided", { userId });
       return next({ status: 400, message: "OTP is required." });
