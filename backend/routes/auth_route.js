@@ -1,6 +1,7 @@
 import express from "express";
-import { createAccount, loginAccount, logoutAccount, sendOtpVerificationEmail } from "../controllers/auth_controller.js";
+import { createAccount, loginAccount, logoutAccount, sendOtpVerificationEmail, verifyEmail } from "../controllers/auth_controller.js";
 import { userAuth } from '../middleware/authenticate.js'
+import rateLimit from "../middleware/rateLimit.js";
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ router.post('/register', createAccount);
 // @desc This API is used to login to user account
 // endpoint POST /api/v1/auth/users/login
 // access PUBLIC
-router.post('/login', loginAccount);
+router.post('/login', rateLimit, loginAccount);
 
 // @desc This API is used to logout from user account
 // endpoint POST /api/v1/auth/users/logout 
@@ -24,5 +25,9 @@ router.post('/logout', logoutAccount);
 // access PUBLIC
 router.post('/send-otp-verify', userAuth, sendOtpVerificationEmail)
 
+// @desc This API is used to verify email using OTP
+// endpoint POST /api/v1/auth/users/verify-otp
+// access PRIVATE
+router.post('/verify-otp', userAuth, verifyEmail);
 
 export default router

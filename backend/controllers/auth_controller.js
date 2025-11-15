@@ -91,7 +91,7 @@ export const loginAccount = async (req, res, next) => {
         }
 
         // step 5 - create a token
-        const payload = { id: user._id, username: user.username, email: user.email };
+        const payload = { id: user._id, email: user.email, role: user.role };
 
         // step 6 - sign the token
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }); 

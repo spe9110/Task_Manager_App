@@ -25,7 +25,7 @@ export const userAuth = (req, res, next) => {
     }
 
     // Attach the decoded user ID to request object
-    req.user = { id: decoded.id };
+    req.user = { id: decoded.id, role: decoded.role };
     logger.info("userAuth - token verified successfully", { userId: decoded.id });
 
     return next();

@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Outfit:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+* {
+    font-family: "Roboto", sans-serif;
+    /* font-family: "Bricolage Grotesque", sans-serif; */
+}
+@layer base {
+  /* === Default (xs: mobile first) === */
+  :root {
+    /* Border radius */
+      --radius: 0.5rem;
+
+      /* Layout */
+      --padding: 16px;
+      --margin: 16px;
+
+      /* Display */
+      --display-large-size: 36px;
+      --display-large-line: 44px;
+      --display-large-spacing: -0.25px;
+
+      --display-medium-size: 28px;
+      --display-medium-line: 36px;
+      --display-medium-spacing: 0;
+
+      --display-small-size: 24px;
+      --display-small-line: 32px;
+      --display-small-spacing: 0;
+
+      /* Headline */
+      --headline-large-size: 22px;
+      --headline-large-line: 28px;
+      --headline-large-spacing: 0;
+
+      --headline-medium-size: 18px;
+      --headline-medium-line: 24px;
+      --headline-medium-spacing: 0;
+
+      --headline-small-size: 16px;
+      --headline-small-line: 22px;
+      --headline-small-spacing: 0;
+
+      /* Title */
+      --title-large-size: 16px;
+      --title-large-line: 24px;
+      --title-large-spacing: 0;
+
+      --title-medium-size: 14px;
+      --title-medium-line: 20px;
+      --title-medium-spacing: 0.15px;
+
+      --title-small-size: 12px;
+      --title-small-line: 16px;
+      --title-small-spacing: 0.1px;
+
+      /* Body */
+      --body-large-size: 14px;
+      --body-large-line: 20px;
+      --body-large-spacing: 0.5px;
+
+      --body-medium-size: 13px;
+      --body-medium-line: 18px;
+      --body-medium-spacing: 0.25px;
+
+      --body-small-size: 12px;
+      --body-small-line: 16px;
+      --body-small-spacing: 0.4px;
+
+      /* Label */
+      --label-large-size: 12px;
+      --label-large-line: 16px;
+      --label-large-spacing: 0.1px;
+
+      --label-medium-size: 11px;
+      --label-medium-line: 16px;
+      --label-medium-spacing: 0.5px;
+
+      --label-small-size: 10px;
+      --label-small-line: 14px;
+      --label-small-spacing: 0.5px;
+  } 
+}

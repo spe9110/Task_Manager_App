@@ -4,7 +4,7 @@ const requireRole = (role) => {
     if (req.user && req.user.role === role) {
       next();
     } else {
-      res.status(403).send('Access denied');
+      next({ status: 403, message: `Access denied: ${role} role required` });
     }
   }
 }
