@@ -188,7 +188,6 @@ export const verifyEmail = async (req, res, next) => {
     const userId = req.user.id;
     const { otp } = req.body;
     logger.info("verifyEmail - start", { userId, otp });
-    logger.info("verifyEmail - userId type", { userId, type: typeof userId });
     if (!otp) {
       logger.warn("verifyEmail - OTP not provided", { userId });
       return next({ status: 400, message: "OTP is required." });
@@ -229,7 +228,7 @@ export const verifyEmail = async (req, res, next) => {
 // ---------------------------
 export const isAuthenticated = (req, res, next) => {
   try {
-    const userId = req.user;
+    const userId = req.user.id;
     logger.info("isAuthenticated - check", { userId });
     return res.status(200).json({
       success: true,
@@ -272,6 +271,7 @@ export const PasswordResetEmail = async (req, res, next) => {
     logger.info("PasswordResetEmail - OTP saved successfully", { email, otp });
 
     // Send OTP via email
+    /*
     const mailOptions = {
       from: {
         name: "Spencer Wawaku",
@@ -284,8 +284,9 @@ export const PasswordResetEmail = async (req, res, next) => {
         .replace("{{email}}", user.email)
         .replace("{{name}}", user.name),
     };
+    */
 
-    await transporter.sendMail(mailOptions);
+    //await transporter.sendMail(mailOptions);
     logger.info("PasswordResetEmail - OTP email sent successfully", { email });
 
     return res.status(200).json({
