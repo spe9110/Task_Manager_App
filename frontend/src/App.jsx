@@ -15,24 +15,17 @@ function App() {
 
   return (
     <div>
-      <ToastContainer
-          position="bottom-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          theme="colored"
-        />
       <ErrorBoundary>
+      <ToastContainer position="bottom-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick theme="colored" />
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="verify-email" element={<VerifyEmail/>} />
+          <Route path="/reset-password" element={<ResetPassword />}/>
           <Route path="/signup" element={<Signup />} />
-          <Route path="reset-password" element={<ResetPassword />}/>
+          <Route path="/login" element={<Login />} />
           <Route path="/" element={<Layout />}> 
             <Route index element={<Home />} />
             <Route element={<PrivateRoute />}>
               <Route path="profile" element={<Profile />} />
-              <Route path="/verify-email" element={<VerifyEmail/>} />
             </Route>
           </Route>
         </Routes>

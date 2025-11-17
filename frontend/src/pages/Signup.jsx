@@ -47,10 +47,11 @@ const Signup = () => {
   // ✅ Fonction appelée à la soumission du formulaire
   const onSubmit = async ({ username, email, password, password_confirm }) => {
     try {
-      const res = await registerUser({ username, email, password, password_confirm }).unwrap();
-      dispatch(setCredentials({ ...res }));
+      await registerUser({ username, email, password, password_confirm }).unwrap();
+      //dispatch(setCredentials({ ...res }));
       reset(); // Réinitialiser le formulaire après l'inscription réussie
       toast.success('User registered successfully! Login now.');
+      navigate('/login');
     } catch (err) {
       console.error(err?.data?.message || err.error);
       toast.error(err?.data?.message || err.error);

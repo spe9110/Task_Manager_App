@@ -31,19 +31,20 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
-  const { userInfo } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
   const hasNavigated = useRef(false);
 
   useEffect(() => {
-    if (userInfo && !hasNavigated.current) {
+    if (userData && !hasNavigated.current) {
       hasNavigated.current = true;
       navigate('/', { replace: true });
     }
-  }, [userInfo, navigate]);
+  }, [userData, navigate]);
 
   const onSubmit = async ({ email, password }) => {
     try {
       const res = await login({ email, password }).unwrap();
+      //setCredentials must be a spread operator ...res to display user otherwise it will display an unknown user
       dispatch(setCredentials({ ...res }));
       toast.success('Login successful!');
       reset();
