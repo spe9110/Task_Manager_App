@@ -58,13 +58,6 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 body: data,
             }),
         }),
-        sendMessage : builder.mutation({
-            query: (data) => ({
-                url: `${USERS_URL}/contact/create`,
-                method: 'POST',
-                body: data
-            }),
-        }),
         updateUser: builder.mutation({
             query: ({ id, files, ...data }) => {
                 const formData = new FormData();
@@ -81,14 +74,30 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 });
 
                 return {
-                url: `${USERS_URL}/users/profile/${id}`,
+                url: `${USERS_URL}/users/update/${id}`,
                 method: "PUT",
                 body: formData,
                 };
             },
             invalidatesTags: ["User"],
         }),
+        deleteUser: builder.mutation({
+            query: (id) => ({
+                url: `${USERS_URL}/users/delete/${id}`,
+                method: 'DELETE'
+            }),
+            invalidatesTags: ["User"],
+        })
     }),
 });
 
-export const { useLoginMutation, useLogoutUserMutation, useRegisterUserMutation, useUpdateUserMutation, useFetchCurrentUserQuery, useVerifyEmailUserMutation, useSendOtpVerificationMutation, useSendResetPasswordMutation, useResetPasswordMutation, useSendMessageMutation } = usersApiSlice;
+export const { useLoginMutation, 
+    useLogoutUserMutation, 
+    useRegisterUserMutation, 
+    useUpdateUserMutation, 
+    useFetchCurrentUserQuery, 
+    useVerifyEmailUserMutation, 
+    useSendOtpVerificationMutation, 
+    useSendResetPasswordMutation, 
+    useResetPasswordMutation, 
+    useDeleteUserMutation } = usersApiSlice;

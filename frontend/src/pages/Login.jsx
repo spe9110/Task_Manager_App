@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
@@ -32,11 +32,10 @@ const Login = () => {
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
   const { userData } = useSelector((state) => state.auth);
-  const hasNavigated = useRef(false);
 
   useEffect(() => {
-    if (userData && !hasNavigated.current) {
-      hasNavigated.current = true;
+    if (userData) {
+      // Redirect only if user is already authenticated
       navigate('/', { replace: true });
     }
   }, [userData, navigate]);
@@ -48,10 +47,10 @@ const Login = () => {
       dispatch(setCredentials({ ...res }));
       toast.success('Login successful!');
       reset();
-      navigate('/');
+      navigate("/", { replace: true });  // Only on success
     } catch (err) {
-      toast.error(err?.data?.message || err.error);
-      console.error(err?.data?.message || err.error);
+      toast.error(err?.data?.message || err?.error);
+      console.error(err?.data?.message || err?.error);
     }
   };
 
