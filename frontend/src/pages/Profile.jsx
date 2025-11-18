@@ -110,7 +110,7 @@ const Profile = () => {
 
 
       <div className="flex flex-row justify-center items-center gap-4">
-        <button onClick={handleShowModalProfile} className="flex items-center justify-center gap-2 border border-slate-400 w-[200px] py-[8px] rounded-md bg-slate-200 hover:bg-slate-300 text-slate-800 transition">
+        <button onClick={handleShowModalProfile} className="flex items-center justify-center gap-2 border border-slate-400 py-[8px] px-[16px] rounded-md bg-slate-200 hover:bg-slate-300 text-slate-800 transition">
           <MdEdit size={24}/>
           <span className='font-semibold'>Edit Profile</span>
         </button>
