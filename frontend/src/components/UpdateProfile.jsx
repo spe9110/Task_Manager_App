@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch } from "react-redux";
@@ -8,29 +8,65 @@ import { setCredentials } from "../redux/authSlice";
 import { toast } from "react-toastify";
 import { IoClose } from "react-icons/io5";
 import AvatarUploader from "./AvatarUploader";
+import { useNavigate } from "react-router-dom";
 
+
+// =======================
+// VALIDATION SCHEMA
+// =======================
 const schema = yup.object().shape({
-  username: yup.string().min(2).max(20).required("Username is required"),
+  username: yup
+    .string()
+    .min(2, "Minimum 2 characters")
+    .max(20, "Maximum 20 characters")
+    .required("Username is required"),
+
+  avatar: yup
+    .mixed()
+    .nullable()
+    .test("fileSize", "Max file size is 5MB", (value) => {
+      if (!value || !(value instanceof File)) return true;
+      return value.size <= 5 * 1024 * 1024;
+    })
+    .test("fileType", "Only JPEG and PNG allowed", (value) => {
+      if (!value || !(value instanceof File)) return true;
+      return ["image/jpeg", "image/png", "image/jpg"].includes(value.type);
+    }),
 });
+
 
 const UpdateProfile = ({ onClose }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  // Fetch logged-in user
+  const { data: user, isLoading: fetching, error } = useFetchCurrentUserQuery();
 
-  // Fetch current user
-  const { data: user, isLoading: fetching } = useFetchCurrentUserQuery();
-
-  // Update mutation
+  // RTK mutation
   const [updateProfile, { isLoading: updating }] = useUpdateUserMutation();
 
+  // Local avatar preview + file
   const [preview, setPreview] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm({
+
+  // =======================
+  // FORM CONTROL
+  // =======================
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: { username: "" },
+    defaultValues: {
+      username: "",
+      avatar: null,
+    },
   });
 
-  // Sync form with fetched user
+  // Prefill when fetching user
   useEffect(() => {
     if (user) {
       setValue("username", user.username);
@@ -38,32 +74,45 @@ const UpdateProfile = ({ onClose }) => {
     }
   }, [user, setValue]);
 
-  const onSubmit = async (formData) => {
-    if (!user) return toast.error("User data not loaded");
 
+  // =======================
+  // SUBMIT LOGIC
+  // =======================
+  const onSubmit = async ({ username }) => {
     try {
-      // Build FormData
-      const payload = new FormData();
-      payload.append("username", formData.username);
-      if (avatarFile) payload.append("avatar", avatarFile);
-
-      const res = await updateProfile({ id: user.id, formData: payload }).unwrap();
-
-      // Update Redux state
-      dispatch(setCredentials(res.data));
+      const res = await updateProfile({
+        id: user.id,
+        file: avatarFile,
+        username,
+      }).unwrap();
+      // Incoming backend userData
+      const newUserData = res.user;
+      dispatch(setCredentials({
+        ...user,
+        ...newUserData,
+      }));
 
       toast.success("Profile updated successfully!");
       onClose();
     } catch (err) {
-      console.error(err);
       toast.error(err?.data?.message || "Profile update failed");
+      console.error(err);
     }
   };
 
-  if (fetching) return <div className="p-6 text-center">Loading profile...</div>;
+
+  if (fetching) {
+    return <div className="p-6 text-center">Loading profile...</div>;
+  }
+
+  if (error?.status === 401 && error?.redirect) {
+      navigate(error.redirect); // redirect to Unauthorized page
+  }
 
   return (
     <div className="relative bg-white w-[40vw] min-w-[340px] p-6 shadow-lg rounded-lg">
+
+      {/* Close button */}
       <button
         className="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-full"
         onClick={onClose}
@@ -72,19 +121,35 @@ const UpdateProfile = ({ onClose }) => {
         <IoClose size={24} />
       </button>
 
+      {/* FORM */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Avatar */}
-        <AvatarUploader
-          imageUrl={preview}
-          onFileSelect={(file) => {
-            setAvatarFile(file);
-            setPreview(URL.createObjectURL(file));
-          }}
+        
+        {/* AVATAR CONTROLLER */}
+        <Controller
+          name="avatar"
+          control={control}
+          render={({ field }) => (
+            <AvatarUploader
+              imageUrl={preview}
+              onFileSelect={(file) => {
+                setAvatarFile(file);
+                setPreview(URL.createObjectURL(file));
+                field.onChange(file);       // Sync with yup
+                setValue("avatar", file);   // Very important!
+              }}
+            />
+          )}
         />
 
-        {/* Username */}
+        {errors.avatar && (
+          <p className="text-xs text-red-500">{errors.avatar.message}</p>
+        )}
+
+
+        {/* USERNAME INPUT */}
         <div>
           <label className="text-sm font-medium text-gray-700">Username:</label>
+
           <input
             type="text"
             {...register("username")}
@@ -92,10 +157,13 @@ const UpdateProfile = ({ onClose }) => {
               errors.username ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.username && <p className="text-xs text-red-500">{errors.username.message}</p>}
+
+          {errors.username && (
+            <p className="text-xs text-red-500">{errors.username.message}</p>
+          )}
         </div>
 
-        {/* Buttons */}
+        {/* ACTION BUTTONS */}
         <div className="flex justify-end gap-4">
           <button
             type="button"
@@ -107,10 +175,10 @@ const UpdateProfile = ({ onClose }) => {
 
           <button
             type="submit"
-            disabled={updating}
+            disabled={isSubmitting || updating}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 disabled:bg-blue-300"
           >
-            {updating ? "Updating..." : "Update"}
+            {isSubmitting || updating ? "Updating..." : "Update"}
           </button>
         </div>
       </form>
@@ -133,10 +201,32 @@ import { IoClose } from "react-icons/io5";
 import AvatarUploader from "./AvatarUploader";
 
 const schema = yup.object().shape({
-  username: yup.string().min(2).max(20).required("Username is required"),
+  username: yup.string()
+    .min(2, "Minimum 2 characters")
+    .max(20, "Maximum 20 characters")
+    .required("Username is required"),
+
+  avatar: yup
+    .mixed()
+    .test("fileExists", "You must provide an image", (value) => {
+      // No file provided → validation passes (OPTIONAL avatar)
+      if (!value) return true;
+
+      // Ensure value is a File instance
+      return value instanceof File;
+    })
+    .test("fileSize", "File is too large. Max size is 5MB.", (value) => {
+      if (!value || !(value instanceof File)) return true;
+      return value.size <= 5 * 1024 * 1024; // 5MB
+    })
+    .test("fileType", "Only JPEG and PNG formats are allowed", (value) => {
+      if (!value || !(value instanceof File)) return true;
+      return ["image/jpeg", "image/png", "image/jpg"].includes(value.type);
+    }),
 });
 
-const UpdateProfile = ({ onClose }) => {
+
+const UpdateProfile = ({ onClose, id }) => {
   const dispatch = useDispatch();
 
   // Fetch current user
@@ -150,15 +240,12 @@ const UpdateProfile = ({ onClose }) => {
   const [avatarFile, setAvatarFile] = useState(null);
 
   // Form setup
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    control,
-    formState: { errors, isSubmitting },
-  } = useForm({
+  const { register, handleSubmit, control, setValue, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: { username: "" },
+    defaultValues: { 
+      username: "",
+      avatar: null
+    },
   });
 
   // Sync form with fetched user
@@ -170,16 +257,12 @@ const UpdateProfile = ({ onClose }) => {
   }, [user, setValue]);
 
   // Submit handler
-  const onSubmit = async (formData) => {
+  const onSubmit = async ({ username, avatar}) => {
     try {
-      // Prepare the body
-      const body = { username: formData.username };
-      if (avatarFile) body.file = avatarFile;
-
       // Call RTK mutation
-      const res = await updateProfile({ id: user.id, file: avatarFile, username: formData.username }).unwrap();
+      const res = await updateProfile({ id, file: avatarFile, username }).unwrap();
 
-      dispatch(setCredentials(res.data));
+      dispatch(setCredentials(...res));
 
       toast.success("Profile updated successfully!");
       onClose();
@@ -259,5 +342,7 @@ const UpdateProfile = ({ onClose }) => {
 };
 
 export default UpdateProfile;
+
+// DatePicker tuto - https://www.youtube.com/watch?v=rXpBeK8Q4WY&list=PLeO8M-2wYaaV5vh2lRWV7qt_-Io8agaf-&index=4
 
 */

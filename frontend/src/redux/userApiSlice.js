@@ -26,7 +26,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         }),
         fetchCurrentUser: builder.query({
             query: () => ({
-                url: `${USERS_URL}/users/current`,
+                url: `${USERS_URL}/users/current?ts=${Date.now()}`,
                 method: 'GET',
             }),
             providesTags: ['User'], // Cache the result with the tag 'User'
@@ -71,7 +71,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 return {
                 url: `${USERS_URL}/users/update/${id}`,
                 method: "PUT",
-                body: formData,
+                body: formData
                 };
             },
             invalidatesTags: ["User"],

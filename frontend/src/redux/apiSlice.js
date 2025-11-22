@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { API_BASE_URL } from '../../Util.js'; // Import the base URL from environment variables
-import { logout } from './authSlice.js';
 
 // Base query configuration with error handling and authentication
 const baseQuery = fetchBaseQuery({
@@ -17,18 +16,20 @@ const baseQuery = fetchBaseQuery({
 
 // Wrapper to handle token expiration / 401
 const baseQueryWithReauth = async (args, api, extraOptions) => {
-  try {
-   let result = await baseQuery(args, api, extraOptions);
+ try {
+        const result = await baseQuery(args, api, extraOptions);
 
-    if (result?.error?.status === 401) {
-      console.warn("⚠️ Unauthorized: logging out user...");
-      api.dispatch(logout());        // clear Redux + localStorage
-      window.location.href = "/signin"; // redirect to login
+        if (result?.error?.status === 401) {
+            // Instead of logout or redirect, just return the error
+            console.warn('⚠️ Unauthorized — API returned 401, user stays logged in');
+            return { error: { status: 401, message: 'Unauthorized' } };
+        }
+
+        return result;
+    } catch (error) {
+        console.error('API Error:', error);
+        return { error: { status: 'FETCH_ERROR', message: 'Network or server error' } };
     }
-    return result; 
-  } catch (error) {
-    console.error("API Error:", error);
-  }
 };
 
 // Create API slice
