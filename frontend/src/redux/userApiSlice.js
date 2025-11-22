@@ -59,16 +59,11 @@ export const usersApiSlice = apiSlice.injectEndpoints({
             }),
         }),
         updateUser: builder.mutation({
-            query: ({ id, files, ...data }) => {
+            query: ({ id, file, ...data }) => {
                 const formData = new FormData();
 
-                // append file(s)
-                if (files && files.length > 0) {
-                formData.append("file", files[0]); // single file
-                // for multiple files: files.forEach((f) => formData.append("files", f));
-                }
+                if (file) formData.append("avatar", file);
 
-                // append other fields
                 Object.entries(data).forEach(([key, value]) => {
                 formData.append(key, value);
                 });
@@ -80,7 +75,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 };
             },
             invalidatesTags: ["User"],
-        }),
+            }),
         deleteUser: builder.mutation({
             query: (id) => ({
                 url: `${USERS_URL}/users/delete/${id}`,

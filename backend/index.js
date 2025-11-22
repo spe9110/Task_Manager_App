@@ -13,6 +13,8 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import helmet from "helmet"
 import mongoose from 'mongoose';
+import taskRoute from "./routes/task_route.js";
+import fs from "fs";
 
 // Connect to the database
 dbConnect();
@@ -20,24 +22,33 @@ dbConnect();
 dotenv.config();
 
 
+// Create uploads folder if missing
+const uploadDir = "./uploads";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log("📁 uploads/ folder created");
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Enable cors
 app.use(cors({
   credentials: true, 
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173'
+  origin: process.env.FRONTEND_URL
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Middleware for parsing cookies
 app.use(cookieParser());
+
 //Morgan for logging
 app.use(morgan('dev'));
 //for security
 app.use(helmet());
 
 app.use(requestLogger);
+
 
 
 // Prometheus default system metrics
@@ -50,7 +61,7 @@ app.use('/api/v1/auth/users', authRoute);
 app.use('/api/v1/users', userRoute);
 app.use('/api/monitoring', monitorRoute);
 app.use('/api/v1/admin', adminDashboardRoute);
-
+app.use('/api/v1/tasks', taskRoute);
 
 app.get('/', (req, res) => {
     res.send('Hello, World! This is the backend for the Task Manager application. <br/> Monitoring in Kubernetes using Prometheus and Grafana');

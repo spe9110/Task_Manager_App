@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { createAccountSchema } from "../validation/createAccount.js";
+import { createAccountSchema, passwordResetSchema } from "../validation/createAccount.js";
 import { loginAccountSchema } from "../validation/loginAccount.js";
 import gravatar from 'gravatar';
 import { secretOrKey } from "../config/key.js";
@@ -313,16 +313,14 @@ export const PasswordResetEmail = async (req, res, next) => {
 // ---------------------------
 export const resetPassword = async (req, res, next) => {
   try {
+    // Validate request body
+    const { error } = passwordResetSchema.validate(req.body, { abortEarly: false });
+    if(error) {
+        logger.warn("resetPassword - validation failed", { error: error.details[0].message });
+        return res.status(400).json({ error: error.details[0].message });
+    }
     const { email, otp, newPassword } = req.body;
     logger.info("resetPassword - start", { email });
-
-    if (!email || !otp || !newPassword) {
-      logger.warn("resetPassword - missing parameters", { email });
-      return next({
-        status: 400,
-        message: "Email, OTP, and new password are required.",
-      });
-    }
 
     const user = await User.findOne({ email });
     if (!user) {

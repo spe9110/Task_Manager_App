@@ -1,6 +1,8 @@
 import User from "../models/user.model.js";
 import logger from "../config/logging.js";
 import cache from "../Utils/cache.js";
+import { uploadToCloudinary } from "./cloudinary_controller.js";
+import { updateUserSchema } from "../validation/createAccount.js";
 
 //@route   GET /api/v1/users
 //@desc    Get all users with caching
@@ -167,39 +169,59 @@ export const getSingleUser = async (req, res, next) => {
   }
 };
 
-// @desc This API is used to update a user profile
-// endpoint app.put() 
-// access PRIVATE
+// @desc Update user profile
+// @route PUT /api/v1/user/update/:id
+// @access PRIVATE
 export const updateAccount = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const { username, avatar } = req.body;
-
-        // Ensure user is updating their own account
-        if (id !== req.user.id) {
-            return res.status(403).json({ message: "Unauthorized" });
-        }
-
-        const user = await User.findById(id);
-        if (!user) {
-            return res.status(404).json({ message: "No user found" });
-        }
-
-        const updates = {};
-        if (username) updates.username = username;
-        if (avatar) updates.avatar = avatar;
-
-        const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
-
-        // Remove sensitive fields
-        const { password, verifyOtp, resetOtp, ...safeUser } = updatedUser.toObject();
-
-        return res.status(200).json({ message: "User updated successfully", data: safeUser });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
+  try {
+    // Validate request body
+    const { error } = updateUserSchema.validate(req.body, { abortEarly: false });
+    if (error) {
+      logger.warn("UPDATE_ACCOUNT validation failed", { error: error.details[0].message });
+      return res.status(400).json({ error: error.details[0].message });
     }
-};
 
+    const { id } = req.params;
+    const { username } = req.body;
+
+    logger.info(`UPDATE_ACCOUNT request received for user ID: ${id}`);
+
+    if (id !== req.user.id) {
+      return next({ status: 401, message: "Unauthorized" });
+    }
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const updates = {};
+
+    if (username) updates.username = username;
+
+    // avatar upload
+    if (req.file) {
+      const avatarUrl = await uploadToCloudinary(req.file.path);
+      updates.avatar = avatarUrl;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    const safeUser = updatedUser.toObject();
+    delete safeUser.password;
+
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: safeUser,
+    });
+
+  } catch (error) {
+    logger.error(`UPDATE_ACCOUNT_ERROR: ${error.message}`);
+    return next({ status: 500, message: error.message });
+  }
+};
 
 
 // @desc This API is used to delete a user profile
@@ -209,7 +231,10 @@ export const deleteAccount = async (req, res, next) => {
   try {
     const { id } = req.params;
     logger.info(`DELETE_ACCOUNT request received for user ID: ${id}`);
-
+    // Ensure user is deleting their own account
+    if (id !== req.user.id) {
+        return next({ status: 401, message: "Unauthorized" });
+    }
     const user = await User.findByIdAndDelete(id);
 
     if (!user) {

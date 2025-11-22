@@ -10,6 +10,10 @@ import "react-toastify/dist/ReactToastify.css";
 import ErrorBoundary from "./components/ErrorBoundary"
 import VerifyEmail from "./pages/VerifyEmail"
 import ResetPassword from "./pages/ResetPassword"
+import CreateTask from "./pages/CreateTask"
+import Tasks from "./pages/Tasks"
+import SingleTask from "./pages/SingleTask"
+import UpdateTask from "./pages/UpdateTask"
 
 function App() {
 
@@ -26,6 +30,10 @@ function App() {
             <Route index element={<Home />} />
             <Route element={<PrivateRoute />}>
               <Route path="profile" element={<Profile />} />
+              <Route path="create-task" element={<CreateTask/>} />
+              <Route path="tasks" element={<Tasks/>} />
+              <Route path="single-task/:id" element={<SingleTask/>} />
+              <Route path="update-task/:id" element={<UpdateTask/>} />
             </Route>
           </Route>
         </Routes>
