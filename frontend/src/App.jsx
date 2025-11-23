@@ -14,6 +14,8 @@ import CreateTask from "./pages/CreateTask"
 import Tasks from "./pages/Tasks"
 import SingleTask from "./pages/SingleTask"
 import UpdateTask from "./pages/UpdateTask"
+import Unauthorized from "./pages/Unauthorized"
+
 
 function App() {
 
@@ -26,6 +28,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />}/>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/" element={<Layout />}> 
             <Route index element={<Home />} />
             <Route element={<PrivateRoute />}>
