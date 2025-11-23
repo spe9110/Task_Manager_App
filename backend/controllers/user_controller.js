@@ -211,6 +211,9 @@ export const updateAccount = async (req, res, next) => {
     const safeUser = updatedUser.toObject();
     delete safeUser.password;
 
+    // 🔹 Delete cache for this user after update
+    cache.del(`user_${id}`);
+
     return res.status(200).json({
       success: true,
       message: "User updated successfully",
@@ -237,11 +240,14 @@ export const deleteAccount = async (req, res, next) => {
     }
     const user = await User.findByIdAndDelete(id);
 
+    
     if (!user) {
       logger.warn(`No user found with ID: ${id}`);
       return next({ status: 404, message: "No user found" });
     }
-
+    // 🔹 Delete cache for this user after deletion
+    cache.del(`user_${id}`);
+    
     logger.info(`User with ID: ${id} deleted successfully`);
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
