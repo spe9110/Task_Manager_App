@@ -1,32 +1,33 @@
 import express from 'express';
-import { createTask, getAllTasks, getTaskById, updateTask, deleteTask } from '../controllers/task_controller.js';
+import { createTask, getAllTasksByUser, getTaskById, updateTask, deleteTask } from '../controllers/task_controller.js';
 import { userAuth } from '../middleware/authenticate.js';
-import requireRole from '../middleware/authorize.js';
+import { authForRoles } from '../middleware/authorize.js';
 
 const router = express.Router();
 
 // @desc    Get all tasks with caching
 // @route   GET /api/v1/tasks
 // @access  PRIVATE
-router.get('/', userAuth, requireRole(['user', 'admin']), getAllTasks);
+router.get('/user/:id', userAuth, authForRoles(['user', 'admin']), getAllTasksByUser);
 
 // @desc    Get a single task by ID
 // @route   GET /api/v1/tasks/:id
 // @access  PRIVATE
-router.get('/:id', userAuth, requireRole(['user', 'admin']), getTaskById);
+router.get('/:id', userAuth, authForRoles(['user', 'admin']), getTaskById);
+
 // @desc    Create a new task
 // @route   POST /api/v1/tasks
 // @access  PRIVATE
-router.post('/', userAuth, requireRole(['user', 'admin']), createTask);
+router.post('/create', userAuth, authForRoles('user'), createTask);
 
 // @desc    Update a task
 // @route   PUT /api/v1/tasks/:id
 // @access  PRIVATE
-router.put('/update/:id', userAuth, requireRole('user'), updateTask);
+router.put('/update/:id', userAuth, authForRoles('user'), updateTask);
 
 // @desc    Delete a task
 // @route   DELETE /api/v1/tasks/:id
 // @access  PRIVATE
-router.delete('/delete/:id', userAuth, requireRole(['user','admin']), deleteTask);
+router.delete('/delete/:id', userAuth, authForRoles(['user','admin']), deleteTask);
 
 export default router;
