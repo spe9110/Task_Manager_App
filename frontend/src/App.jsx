@@ -29,14 +29,15 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          {/* Protected Routes */}
           <Route path="/" element={<Layout />}> 
             <Route index element={<Home />} />
             <Route element={<PrivateRoute />}>
-              <Route path="profile" element={<Profile />} />
-              <Route path="create-task" element={<CreateTask/>} />
               <Route path="tasks" element={<Tasks/>} />
+              <Route path="create-task" element={<CreateTask/>} />
               <Route path="single-task/:id" element={<SingleTask/>} />
               <Route path="update-task/:id" element={<UpdateTask/>} />
+              <Route path="profile" element={<Profile />} />
             </Route>
           </Route>
         </Routes>

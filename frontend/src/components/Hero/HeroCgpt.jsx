@@ -1,7 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+
+
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e3f2fd] via-[#f8faff] to-[#f0f7ff] overflow-hidden text-gray-900">
       {/* 🌥️ Soft Background Texture or Image Overlay */}
@@ -29,12 +34,9 @@ const Hero = () => {
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4">
-          <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold rounded-full shadow-md hover:shadow-blue-300/40 hover:scale-105 transition duration-300">
+          <button onClick={() => navigate("/tasks")} className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold rounded-full shadow-md hover:shadow-blue-300/40 hover:scale-105 transition duration-300">
             Let's get Started...
           </button>
-          {/* <button className="px-8 py-4 bg-transparent border border-blue-300 hover:bg-blue-50 text-blue-600 rounded-full font-semibold transition duration-300">
-            Learn More
-          </button> */}
         </div>
       </motion.div>
     </section>
