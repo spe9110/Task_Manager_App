@@ -1,75 +1,88 @@
 import React, { useState, useCallback } from "react";
 import AddTaskBtn from "../components/AddTaskBtn";
 import { IoIosArrowDown } from "react-icons/io";
+import { useSelector } from "react-redux";
 import { FaPlus } from "react-icons/fa6";
 import Modal from "react-modal";
 import CreateTask from "./CreateTask";
+import { useNavigate } from "react-router-dom";
+import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query';
+import { fetchUserTaskData } from "../API/api";
+import Loader from "../components/Loader"
+
 
 Modal.setAppElement("#root");
 
 const Tasks = () => {
-    // --- Fetch fresh data: SINGLE SOURCE OF TRUTH ---
-    // const {
-    //   data: response,
-    //   isLoading: fetching,
-    //   isError,
-    //   error,
-    // } = useFetchCurrentUserQuery();
+  const { userData } = useSelector((state) => state.auth);
+  // queryClient = used with mutation to invalidate data.
+  const queryClient = useQueryClient();
   
-    // const profile = response; // <--- RTK Query gives you accurate user data
-  
-    // Modal state
-      const [ showModalCreateTask, setShowModalCreateTask ] = useState(false);
-      const [modalType, setModalType] = useState(null);
-  
-    //modal for user profile 
-    const handleShowCreateTaskModal = useCallback(() => {
-      setShowModalCreateTask(!showModalCreateTask);
-      setModalType("create");
-    }, [showModalCreateTask]);
-  
+  // const profile = response; // <--- RTK Query gives you accurate user data
+  const navigate = useNavigate();
+  // Modal state
+    const [ showModalCreateTask, setShowModalCreateTask ] = useState(false);
+    const [modalType, setModalType] = useState(null);
+
+    // fetch user data using tanstack query
+    const { data: tasks, isPending, isError, error } = useQuery({
+      queryKey: ['tasks', userData?.id],
+      // Make the queryFn read the id from queryKey
+      queryFn: fetchUserTaskData,
+      // don't run the query until we have an id
+      enabled: !!userData?.id,
+    })
     
-    const handleCloseModal = useCallback(() => {
-      setModalType(null);
-    }, []);
+    console.log("userData", userData?.id)
+    console.log("tasks data from React Query (tanstack):", tasks);
+
+  //modal for user profile 
+  const handleShowCreateTaskModal = useCallback(() => {
+    setShowModalCreateTask(!showModalCreateTask);
+    setModalType("create");
+  }, [showModalCreateTask]);
+
   
-    const customStyles = {
-      overlay: {
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent black
-        zIndex: 1000, // optional: ensure it's on top
-        backdropFilter: 'blur(5px)', // This blurs what's behind the overlay
-        WebkitBackdropFilter: 'blur(5px)', // For Safari support
-      },
-      content: {
-        top: '50%',
-        left: '50%',
-        right: 'auto',
-        bottom: 'auto',
-        marginRight: '-50%',
-        transform: 'translate(-50%, -50%)',
-        margin: 0,
-        padding: 0,
-        boxSizing: 'border-box',
-      },
-    };
+  const handleCloseModal = useCallback(() => {
+    setModalType(null);
+  }, []);
+
+  const customStyles = {
+    overlay: {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent black
+      zIndex: 1000, // optional: ensure it's on top
+      backdropFilter: 'blur(5px)', // This blurs what's behind the overlay
+      WebkitBackdropFilter: 'blur(5px)', // For Safari support
+    },
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+    },
+  };
     // Loading UI
-    // if (fetching) {
-    //   return (
-    //     <div className="w-full min-h-screen flex justify-center items-center text-xl text-gray-500">
-    //       Loading profile...
-    //     </div>
-    //   );
-    // }
+    if (isPending) {
+      return <Loader />
+    }
   
     // Error UI
-    // if (isError) {
-    //   return (
-    //     <div className="w-full min-h-screen flex justify-center items-center text-xl text-red-500">
-    //       Failed to load profile: {error?.data?.message || "Unknown error"}
-    //     </div>
-    //   );
-    // }
+    if (isError) {
+      return (
+        <div className="w-full min-h-screen flex justify-center items-center text-xl text-red-500">
+          Failed to load profile: {error?.data?.message || "Unknown error"}
+        </div>
+      );
+    }
   
+    // Extract the data array from the response
+  const taskList = tasks?.data || [];
+  console.log('data to display: ', taskList)
   return (
     <div className="w-full min-h-screen flex flex-col py-24 px-[64px] bg-green-50">
       <h1 className="text-3xl font-bold">Task to do</h1>
@@ -100,13 +113,37 @@ const Tasks = () => {
               <th className="border border-gray-300 text-start px-2 py-1">Due Date</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td className="border border-gray-300 px-2 py-1">Go to work tomorrow</td>
-              <td className="border border-gray-300 px-2 py-1">High</td>
-              <td className="border border-gray-300 px-2 py-1">Pending</td>
-              <td className="border border-gray-300 px-2 py-1">2024-12-15</td>
-            </tr>
+                    <tbody>
+            {taskList && taskList.length > 0 ? (
+              taskList.map((task) => (
+                <tr key={task._id}>
+                  <td className="border border-gray-300 px-2 py-1">{task.name}</td>
+                  <td className="border border-gray-300 px-2 py-1">{task.priority}</td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    <span className={`px-3 py-1 rounded-full text-white text-sm font-semibold ${
+                      task.status === 'Open' 
+                        ? 'bg-orange-500 hover:bg-orange-600' 
+                        : task.status === 'Closed'
+                        ? 'bg-green-500 hover:bg-green-600'
+                        : task.status === 'Pending'
+                        ? 'bg-yellow-500 hover:bg-yellow-600'
+                        : 'bg-gray-500 hover:bg-gray-600'
+                    }`}>
+                      {task.status}
+                    </span>
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    {new Date(task.due).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="border border-gray-300 px-2 py-1 text-center">
+                  No tasks found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

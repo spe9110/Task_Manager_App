@@ -5,13 +5,24 @@ import App from './App.jsx'
 import { BrowserRouter } from "react-router-dom"
 import { Provider } from 'react-redux'
 import store from './store.js'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+
+const queryClient = new QueryClient();
+
+// Use Vite's import.meta.env.MODE to check the environment
+const isDev = import.meta.env.MODE === 'development';
 
 createRoot(document.getElementById('root')).render(
-  <Provider store={store}>
-    <StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </StrictMode>
-  </Provider>,
+  <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
+      <StrictMode>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </StrictMode>
+    </Provider>
+    {isDev && <ReactQueryDevtools initialIsOpen={false} />}
+  </QueryClientProvider>
 )
