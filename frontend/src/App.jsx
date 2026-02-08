@@ -64,3 +64,4 @@ export default App
 // npm i react-phone-number-input
 // npm i react-datepicker
 // npm install --save @sentry/react
+// npm i @tanstack/react-query

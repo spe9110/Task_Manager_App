@@ -1,4 +1,4 @@
-import React from 'react'
+import { useState } from 'react'
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
@@ -6,6 +6,8 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { createUserTask } from '../API/api';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const schema = yup.object({
   name: yup.string().min(3, "Task name must be at least 3 characters").max(100).trim().required("Task name is required"),
@@ -17,6 +19,7 @@ const schema = yup.object({
 
 const CreateTask = ({ closeModal }) => {
   const { userData } = useSelector((state) => state.auth);
+  
   const {
     control,
     handleSubmit,
@@ -29,7 +32,7 @@ const CreateTask = ({ closeModal }) => {
       description: "",
       priority: "not urgent",
       status: "Open",
-      due: null,
+      due: new Date(), // Set default to today's date
     },
   })
 
@@ -147,12 +150,20 @@ const CreateTask = ({ closeModal }) => {
               name="due"
               control={control}
               render={({ field }) => (
-                <input
+                <DatePicker
                   {...field}
-                  type="date"
-                  className={`px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  selected={field.value}
+                  onChange={(date) => field.onChange(date)}
+                  showTimeSelect
+                  timeInputLabel='Time'
+                  dateFormat='MM/dd/yyyy h:mm aa'
+                  placeholderText="Select due date"
+                  minDate={new Date()} // Prevent selecting past dates
+                  className={`px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full ${
                     errors.due ? 'border-red-500' : 'border-gray-300'
                   }`}
+                  // popperClassName='!fixed !top-auto !left-auto'
+                  // popperPlacement='bottom-start'
                 />
               )}
             />

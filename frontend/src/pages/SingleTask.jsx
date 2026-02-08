@@ -1,8 +1,6 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { IoArrowBack } from "react-icons/io5";
-import { Link } from 'react-router-dom';
-import { hover } from 'framer-motion';
 
 const styleGoBack = {
     backgroundColor: '#d6d6d65c',       // Tailwind's bg-red-300
@@ -23,11 +21,17 @@ const styleGoBack = {
 
 const SingleTask = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   return (
     <div className="w-full h-screen flex justify-center items-center">
-      <Link to='..' relative='path' style={styleGoBack}>
-          <span><IoArrowBack size={32} /></span>
-      </Link>
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        style={styleGoBack}
+        aria-label="Go back"
+      >
+        <IoArrowBack size={32} />
+      </button>
       <h1 className="text-2xl font-bold">Single Task Page - {id}</h1>  
     </div>
   )

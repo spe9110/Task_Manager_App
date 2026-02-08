@@ -85,3 +85,53 @@
       --label-small-spacing: 0.5px;
   } 
 }
+
+@layer components {
+  .react-datepicker {
+    @apply block !visible absolute bg-white border border-gray-300 rounded-lg shadow-lg z-50 mt-2;
+  }
+
+  .react-datepicker__month-container {
+    @apply block w-full;
+  }
+
+  .react-datepicker__time-container {
+    @apply flex flex-col border-l border-gray-300 w-24 p-2;
+  }
+
+  .react-datepicker__time-list {
+    @apply block max-h-48 overflow-y-auto;
+  }
+
+  .react-datepicker__time-list-item {
+    @apply block px-2 py-1 cursor-pointer hover:bg-blue-100;
+  }
+
+  .react-datepicker__time-list-item--selected {
+    @apply bg-blue-500 text-white;
+  }
+
+  .react-datepicker__day {
+    @apply inline-block w-10 h-10 leading-10 text-center cursor-pointer hover:bg-blue-100;
+  }
+
+  .react-datepicker__day--selected {
+    @apply bg-blue-500 text-white;
+  }
+
+  .react-datepicker__day--outside-month {
+    @apply text-gray-400;
+  }
+
+  .react-datepicker__header {
+    @apply bg-gray-100 border-b border-gray-300 p-2;
+  }
+
+  .react-datepicker__current-month {
+    @apply font-semibold text-gray-900;
+  }
+
+  .react-datepicker__navigation {
+    @apply top-2;
+  }
+}

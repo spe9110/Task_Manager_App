@@ -6,24 +6,23 @@ import { FaPlus } from "react-icons/fa6";
 import Modal from "react-modal";
 import CreateTask from "./CreateTask";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { fetchUserTaskData } from "../API/api";
 import Loader from "../components/Loader"
+import { Link } from "react-router-dom";
 
 
 Modal.setAppElement("#root");
 
 const Tasks = () => {
   const { userData } = useSelector((state) => state.auth);
-  // queryClient = used with mutation to invalidate data.
-  const queryClient = useQueryClient();
-  
+   
   // const profile = response; // <--- RTK Query gives you accurate user data
   const navigate = useNavigate();
   // Modal state
     const [ showModalCreateTask, setShowModalCreateTask ] = useState(false);
     const [modalType, setModalType] = useState(null);
-
+    
     // fetch user data using tanstack query
     const { data: tasks, isPending, isError, error } = useQuery({
       queryKey: ['tasks', userData?.id],
@@ -41,7 +40,6 @@ const Tasks = () => {
     setShowModalCreateTask(!showModalCreateTask);
     setModalType("create");
   }, [showModalCreateTask]);
-
   
   const handleCloseModal = useCallback(() => {
     setModalType(null);
@@ -113,10 +111,10 @@ const Tasks = () => {
               <th className="border border-gray-300 text-start px-2 py-1">Due Date</th>
             </tr>
           </thead>
-                    <tbody>
+          <tbody>
             {taskList && taskList.length > 0 ? (
               taskList.map((task) => (
-                <tr key={task._id}>
+                <tr key={task._id} onClick={() => navigate(`/single-task/${task._id}`)}>
                   <td className="border border-gray-300 px-2 py-1">{task.name}</td>
                   <td className="border border-gray-300 px-2 py-1">{task.priority}</td>
                   <td className="border border-gray-300 px-2 py-1">
