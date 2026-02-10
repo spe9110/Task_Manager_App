@@ -8,7 +8,7 @@ const router = express.Router();
 // @desc    Get all tasks with caching
 // @route   GET /api/v1/tasks
 // @access  PRIVATE
-router.get('/user/:id', userAuth, authForRoles(['user', 'admin']), getAllTasksByUser);
+router.get('/:userId/tasks', userAuth, authForRoles(['user', 'admin']), getAllTasksByUser);
 
 // @desc    Get a single task by ID
 // @route   GET /api/v1/tasks/:id

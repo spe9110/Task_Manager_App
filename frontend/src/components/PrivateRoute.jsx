@@ -1,10 +1,15 @@
 import React from 'react';
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from 'react-redux';
-// import Loader from './Loader';
+import Loader from './Loader';
 
 const PrivateRoute = () => {
   const { userData } = useSelector((state) => state.auth);
+
+  // Redux pas encore hydraté
+  if (userData === undefined) {
+    return <Loader />;
+  }
 
   return userData ? <Outlet /> : <Navigate to="/login" replace />;
 };

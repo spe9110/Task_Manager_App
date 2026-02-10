@@ -73,7 +73,7 @@ const Tasks = () => {
     if (isError) {
       return (
         <div className="w-full min-h-screen flex justify-center items-center text-xl text-red-500">
-          Failed to load profile: {error?.data?.message || "Unknown error"}
+          Failed to load profile: {error?.message || "Unknown error"}
         </div>
       );
     }
@@ -114,7 +114,7 @@ const Tasks = () => {
           <tbody>
             {taskList && taskList.length > 0 ? (
               taskList.map((task) => (
-                <tr key={task._id} onClick={() => navigate(`/single-task/${task._id}`)}>
+                <tr key={task._id} className="cursor-pointer hover:bg-slate-300" onClick={() => navigate(`/single-task/${task._id}`)}>
                   <td className="border border-gray-300 px-2 py-1">{task.name}</td>
                   <td className="border border-gray-300 px-2 py-1">{task.priority}</td>
                   <td className="border border-gray-300 px-2 py-1">
