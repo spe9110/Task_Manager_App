@@ -1,5 +1,6 @@
 import express from 'express';
 import { createTask, getAllTasksByUser, getTaskById, updateTask, deleteTask } from '../controllers/task_controller.js';
+import { searchTasks } from '../service/pagination_1.js';
 import { userAuth } from '../middleware/authenticate.js';
 import { authForRoles } from '../middleware/authorize.js';
 
@@ -9,6 +10,11 @@ const router = express.Router();
 // @route   GET /api/v1/tasks
 // @access  PRIVATE
 router.get('/:userId/tasks', userAuth, authForRoles(['user', 'admin']), getAllTasksByUser);
+
+// @desc Get paginated users tasks
+// @route GET /api/v1/tasks
+// @access PRIVATE
+router.get('/:userId/paginate', userAuth, authForRoles(['user', 'admin']), searchTasks)
 
 // @desc    Get a single task by ID
 // @route   GET /api/v1/tasks/:id
