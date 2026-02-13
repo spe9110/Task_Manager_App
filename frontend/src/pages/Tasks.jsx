@@ -1,15 +1,17 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import AddTaskBtn from "../components/AddTaskBtn";
 import { IoIosArrowDown } from "react-icons/io";
 import { useSelector } from "react-redux";
 import { FaPlus } from "react-icons/fa6";
 import Modal from "react-modal";
 import CreateTask from "./CreateTask";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { fetchUserTaskData } from "../API/api";
 import Loader from "../components/Loader"
 import { Link } from "react-router-dom";
+import Pagination from "../components/Pagination";
+
 
 
 Modal.setAppElement("#root");
@@ -20,20 +22,31 @@ const Tasks = () => {
   // const profile = response; // <--- RTK Query gives you accurate user data
   const navigate = useNavigate();
   // Modal state
-    const [ showModalCreateTask, setShowModalCreateTask ] = useState(false);
-    const [modalType, setModalType] = useState(null);
-    
-    // fetch user data using tanstack query
-    const { data: tasks, isPending, isError, error } = useQuery({
-      queryKey: ['tasks', userData?.id],
-      // Make the queryFn read the id from queryKey
-      queryFn: fetchUserTaskData,
-      // don't run the query until we have an id
-      enabled: !!userData?.id,
-    })
-    
-    console.log("userData", userData?.id)
-    console.log("tasks data from React Query (tanstack):", tasks);
+  const [ showModalCreateTask, setShowModalCreateTask ] = useState(false);
+  const [modalType, setModalType] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [itemCount, setItemCount] = useState(0);
+  const page = parseInt(searchParams.get('page')) || 1;
+  
+  // pagination useEffect
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const query = searchParams.size ? '?' + searchParams.toString() : '';
+      const res = await
+    }
+  },[searchParams])
+
+  // fetch user data using tanstack query
+  const { data: tasks, isPending, isError, error } = useQuery({
+    queryKey: ['tasks', userData?.id],
+    // Make the queryFn read the id from queryKey
+    queryFn: fetchUserTaskData,
+    // don't run the query until we have an id
+    enabled: !!userData?.id,
+  })
+  
+  console.log("userData", userData?.id)
+  console.log("tasks data from React Query (tanstack):", tasks);
 
   //modal for user profile 
   const handleShowCreateTaskModal = useCallback(() => {
@@ -145,6 +158,7 @@ const Tasks = () => {
           </tbody>
         </table>
       </div>
+      <Pagination itemCount={100} pageSize={10} currentPage={1}/>
     </div>
   )
 }

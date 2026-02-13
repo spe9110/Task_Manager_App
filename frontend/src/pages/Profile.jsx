@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import Modal from "react-modal";
 import { MdEdit, MdDelete } from "react-icons/md";
