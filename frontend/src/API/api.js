@@ -1,6 +1,5 @@
 import { API_BASE_URL } from "../../Util";
 
-
 export const fetchUserTaskData = async ({ queryKey}) => {
     // If you expect queryFn to pass the whole context, you can accept ({queryKey}) instead
     const [, userId] = queryKey;
@@ -21,6 +20,32 @@ export const fetchUserTaskData = async ({ queryKey}) => {
     const result = await res.json();
     return result;
 };
+
+export const fetchPaginatedTasks = async ({ queryKey }) => {
+    try {
+        // If you expect queryFn to pass the whole context, you can accept ({queryKey}) instead
+        const [, userId, page = 1, limit = 10] = queryKey; // page comes from queryKey
+        if (!userId) return [];
+
+        const token = JSON.parse(localStorage.getItem("userData"))?.AccessToken;
+        console.log("Token being sent:", token);
+
+        const res = await fetch(`${API_BASE_URL}/api/v1/tasks/${userId}/paginate?page=${page}&limit=${limit}`, {
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!res.ok) throw new Error(`Failed to fetch data: ${res.status}`);
+        const result = await res.json();
+        return result;
+
+    } catch (error) {
+        console.error(error.message)
+    }
+}
 
 
 export const createUserTask = async (data) => {

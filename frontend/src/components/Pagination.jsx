@@ -6,7 +6,7 @@ import { FaAngleRight } from "react-icons/fa6";
 import { FaAnglesRight } from "react-icons/fa6";
 
 
-function Pagination({ itemCount, pageSize, currentPage }) {
+function Pagination({ itemCount, pageSize, currentPage, onPageChange }) {
     // Initialize useSearchParams
     const [searchParams, setSearchParams] = useSearchParams();
     // calculate the total number of page 
