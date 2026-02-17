@@ -11,7 +11,9 @@ import { fetchPaginatedTasks } from "../API/api";
 import Loader from "../components/Loader"
 import { Link } from "react-router-dom";
 import Pagination from "../components/Pagination";
-import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table'
+import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
+import { DateTime } from "luxon";
+import EmptyFolder from "../assets/icons8-dossier-ouvert.svg"
 
 
 Modal.setAppElement("#root");
@@ -41,14 +43,19 @@ const Tasks = () => {
   console.log("userData", userData?.id)
   console.log("tasks data from React Query (tanstack):", tasks);
 
+  // ✅ Change Page
   const changePage = (newPage) => {
-    searchParams.set("page", newPage);
-    setSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams);
+    params.set("page", newPage);
+    setSearchParams(params);
   };
 
+  // ✅ Change Limit (Reset to page 1)
   const changeLimit = (newLimit) => {
-    searchParams.set("limit", newLimit);
-    setSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams);
+    params.set("page", 1);
+    params.set("limit", newLimit);
+    setSearchParams(params);
   };
 
   //modal for user profile 
@@ -98,15 +105,23 @@ const columns = useMemo(() => [
     cell: info => info.getValue()
   },
   {
-    accessorKey: 'due',      // if your due date field is `due`
-    header: 'Due Date',
-    cell: info => info.getValue()
+    accessorKey: "due",
+    header: "Due Date",
+    cell: (info) => {
+      const value = info.getValue();
+
+      if (!value) return "-";
+
+      return DateTime
+        .fromISO(value)
+        .toFormat("dd LLL yyyy");
+    }
   }
 ], []);
 
   // Extract the data array from the response
 const taskList = tasks?.data || [];
-// const taskList = tasks?.data ?? [];
+const totalTasks = tasks?.pagination?.totalTasks ?? [];
 
 const filteredData = useMemo(() => taskList, [taskList]);
 console.log('data to display: ', taskList)
@@ -117,10 +132,21 @@ console.log('data to display: ', taskList)
   const table = useReactTable({
     columns,
     data: filteredData, //stable reference
-    getCoreRowModel: getCoreRowModel(),
-    // getPaginationRowModel: getPaginationRowModel(),
-    // getSortedRowModel: getSortedRowModel()
+    getCoreRowModel: getCoreRowModel()
   })
+
+  // ✅ Handle loading
+  if (isPending) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <div>Error: {error.message}</div>;
+  }
   
   return (
     <div className="w-full min-h-screen flex flex-col py-24 px-[64px] bg-green-50">
@@ -132,7 +158,7 @@ console.log('data to display: ', taskList)
             <span>All Tasks</span>
             <IoIosArrowDown className="inline-block" />
           </div>
-          <AddTaskBtn value="Create New Task" icon={<FaPlus />} onclick={handleShowCreateTaskModal} />
+          <AddTaskBtn icon={<FaPlus />} value="Create New Task" onclick={handleShowCreateTaskModal} />
           <Modal
             isOpen={modalType === "create"}
             onRequestClose={handleCloseModal}
@@ -142,7 +168,7 @@ console.log('data to display: ', taskList)
           </Modal>
         </div>
         <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-200">
+          <thead className="bg-green-400">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
@@ -160,33 +186,57 @@ console.log('data to display: ', taskList)
           </thead>
 
           <tbody>
-            {table.getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="border px-2 py-1">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
+            {table.getRowModel().rows.length > 0 ? (
+              table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  onClick={() => navigate(`/single-task/${row.original._id}`)}
+                  className="hover:bg-neutral-200 cursor-pointer"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="border px-2 py-1">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={columns.length}>
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <img src={EmptyFolder} alt="empty folder" className="w-16 h-16 mb-4" />
+                    <p className="text-gray-500">No tasks found</p>
+                  </div>
+                </td>
               </tr>
-            ))}
+            )}
           </tbody>
-        </table>
 
+        </table>
       </div>
-      <Pagination
-        itemCount={tasks?.totalTasks || 0} // based on backend response
-        pageSize={limit}
-        currentPage={page}
-        onPageChange={changePage}
-      />
-      <select
-        value={limit}
-        onChange={(e) => changeLimit(Number(e.target.value))}
-      >
-        <option value={5}>5</option>
-        <option value={10}>10</option>
-        <option value={20}>20</option>
-      </select>
+      <div className="pagination w-full flex justify-between items-center mt-2">
+
+        {/* ✅ Pagination Component */}
+        <Pagination
+          itemCount={totalTasks}
+          pageSize={limit}
+          currentPage={page}
+          onPageChange={changePage}
+        />
+
+        {/* ✅ Limit Selector */}
+        <div className="flex-2 mt-4">
+          <select
+            value={limit}
+            onChange={(e) => changeLimit(Number(e.target.value))}
+            className="border p-2"
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+          </select>
+        </div>
+      </div>
     </div>
   )
 }
