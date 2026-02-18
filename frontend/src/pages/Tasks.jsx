@@ -14,6 +14,7 @@ import Pagination from "../components/Pagination";
 import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
 import { DateTime } from "luxon";
 import EmptyFolder from "../assets/icons8-dossier-ouvert.svg"
+import SortedHeader from "../components/SortedHeader";
 
 
 Modal.setAppElement("#root");
@@ -29,10 +30,14 @@ const Tasks = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page")) || 1;
-  const limit = Number(searchParams.get("limit")) || 10; 
+  const limit = Number(searchParams.get("limit")) || 10;
+  const status = searchParams.get("status") || "All";
+  const sort = searchParams.get("sort") || "createdAt";
+  const order = searchParams.get("order") || "desc";
+
     // fetch user data using tanstack query
   const { data: tasks, isPending, isError, error } = useQuery({
-    queryKey: ['tasks', userData?.id, page, limit],
+    queryKey: ['tasks', userData?.id, page, limit, status, sort, order],
     // Make the queryFn read the id from queryKey
     queryFn: fetchPaginatedTasks,
     // don't run the query until we have an id
@@ -87,52 +92,64 @@ const Tasks = () => {
       boxSizing: 'border-box',
     },
   };
-  // columns definition
+  // columns definition and make the header clickable
 const columns = useMemo(() => [
   {
-    accessorKey: 'name',      // matches your data
-    header: 'Task',
-    cell: info => info.getValue()
+    accessorKey: 'name',
+    header: () => <SortedHeader label="Task" field="name" />,
   },
   {
-    accessorKey: 'priority',  // if priority exists
-    header: 'Priority',
-    cell: info => info.getValue()
+    accessorKey: 'priority',
+    header: () => <SortedHeader label="Priority" field="priority" />,
   },
   {
-    accessorKey: 'status',    // if status exists
-    header: 'Status',
-    cell: info => info.getValue()
+    accessorKey: 'status',
+    header: () => <SortedHeader label="Status" field="status" />,
   },
   {
     accessorKey: "due",
-    header: "Due Date",
+    header: () => <SortedHeader label="Due Date" field="due" />,
     cell: (info) => {
       const value = info.getValue();
-
       if (!value) return "-";
-
-      return DateTime
-        .fromISO(value)
-        .toFormat("dd LLL yyyy");
+      return DateTime.fromISO(value).toFormat("dd LLL yyyy");
     }
   }
-], []);
+], [searchParams]);
+
+
+  // Handle filter
+const handleStatus = (e) => {
+  const value = e.target.value;
+
+  const params = new URLSearchParams(searchParams);
+  params.set("page", 1); // reset to page 1 when filtering
+
+  if (value === "All") {
+    params.delete("status"); // remove status from URL
+  } else {
+    params.set("status", value);
+  }
+
+  setSearchParams(params);
+};
+
 
   // Extract the data array from the response
 const taskList = tasks?.data || [];
 const totalTasks = tasks?.pagination?.totalTasks ?? [];
 
-const filteredData = useMemo(() => taskList, [taskList]);
-console.log('data to display: ', taskList)
+// const filteredData = useMemo(() => taskList, [taskList]);
+// console.log('data to display: ', taskList)
 
   //✅ GOOD: This will not cause an infinite loop of re-renders because `filteredData` is memoized
 
   // create instance of table
   const table = useReactTable({
     columns,
-    data: filteredData, //stable reference
-    getCoreRowModel: getCoreRowModel()
+    data: taskList, //stable reference
+    getCoreRowModel: getCoreRowModel(),
+    manualSorting: true, // 👈 tells table sorting is server-side
   })
 
   // ✅ Handle loading
@@ -155,8 +172,15 @@ console.log('data to display: ', taskList)
 
         <div className="flex justify-between items-center mb-8">
           <div className="flex justify-between items-center space-x-2 border border-neutral-300 px-2 py-1 rounded-sm cursor-pointer">
-            <span>All Tasks</span>
-            <IoIosArrowDown className="inline-block" />
+            <select defaultValue="All" className="bg-transparent cursor-pointer"
+              onChange={handleStatus}
+              value={status}
+            >
+              <option className="cursor-pointer" value="All">All Tasks</option>
+              <option className="cursor-pointer" value="Open">Open</option>
+              <option className="cursor-pointer" value="Done">Done</option>
+            </select>
+            {/* <IoIosArrowDown className="inline-block" /> */}
           </div>
           <AddTaskBtn icon={<FaPlus />} value="Create New Task" onclick={handleShowCreateTaskModal} />
           <Modal

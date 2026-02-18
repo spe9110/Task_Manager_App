@@ -97,7 +97,13 @@ const UpdateTask = ({ closeModal }) => {
     });
   };
 
-  if(isUpdating || isPending) return <Loader />
+  if(isUpdating || isPending) {
+    return (
+            <div className="w-full flex justify-center items-center h-screen">
+              <Loader />
+            </div>
+    )
+  } 
 
   return (
     <div>
