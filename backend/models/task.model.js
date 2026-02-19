@@ -20,7 +20,7 @@ const taskSchema = new Schema({
     },
     due: {
         type: Date,
-        default: new Date().toISOString(),
+        default: Date.now,
     },
     status: {
         type: String,

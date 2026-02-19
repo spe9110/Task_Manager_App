@@ -3,6 +3,90 @@ import Task from '../models/task.model.js'
 // Challenge - create a pagination API with search, pagination, filter and sort functionality using express.js
 
 export const searchTasks = async (req, res) => {
+  try {
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit) || 10, 1);
+
+    const query = { user: req.user.id };
+
+    const { sort = "createdAt", order = "desc" } = req.query;
+
+    const allowedFields = ["name", "priority", "status", "due", "createdAt"];
+    const sortField = allowedFields.includes(sort) ? sort : "createdAt";
+    const sortDirection = order === "asc" ? 1 : -1;
+
+    const sortOptions = {
+      [sortField]: sortDirection,
+      _id: sortDirection
+    };
+
+    // Filters
+    const { priority, status, createdAt, createdFrom, createdTo } = req.query;
+
+    if (priority && ["Urgent", "not urgent"].includes(priority)) {
+      query.priority = priority;
+    }
+
+    if (status && ["Open", "Done"].includes(status)) {
+      query.status = status;
+    }
+
+    if (createdAt) {
+      const date = new Date(createdAt);
+      const start = new Date(date.setHours(0, 0, 0, 0));
+      const end = new Date(date.setHours(23, 59, 59, 999));
+      query.createdAt = { $gte: start, $lte: end };
+    } else if (createdFrom || createdTo) {
+      query.createdAt = {
+        ...(createdFrom && { $gte: new Date(createdFrom) }),
+        ...(createdTo && { $lte: new Date(createdTo) })
+      };
+    }
+
+    // ✅ 1️⃣ Count first
+    const totalTasks = await Task.countDocuments(query);
+
+    // ✅ 2️⃣ Then totalPages
+    const totalPages = Math.ceil(totalTasks / limit) || 1;
+
+    // ✅ 3️⃣ Then currentPage
+    const currentPage = Math.min(page, totalPages);
+
+    // ✅ 4️⃣ Then skip
+    const skip = (currentPage - 1) * limit;
+
+    // ✅ 5️⃣ Then find
+    const userTasks = await Task.find(query)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      message: "Tasks fetched successfully",
+      data: userTasks,
+      pagination: {
+        totalTasks,
+        totalPages,
+        currentPage,
+        nextPage: currentPage < totalPages ? currentPage + 1 : null,
+        previousPage: currentPage > 1 ? currentPage - 1 : null,
+        limit
+      }
+    });
+
+  } catch (error) {
+    console.error("Search error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong!"
+    });
+  }
+};
+
+/*
+export const searchTasks = async (req, res) => {
     try {
         // step 1 - Initialize the page first page to display - By defaut it's the first page
         const page = parseInt(req.query.page) || 1 
@@ -19,7 +103,8 @@ export const searchTasks = async (req, res) => {
 
         const sortDirection = order === "asc" ? 1 : -1;
 
-        const sortOptions = { [sortField]: sortDirection };
+        // const sortOptions = { [sortField]: sortDirection };
+        const sortOptions = { [sortField]: sortDirection, _id: sortDirection };
 
         // Filter logic
         const { priority, status, createdAt, createdFrom, createdTo } = req.query;
@@ -41,27 +126,29 @@ export const searchTasks = async (req, res) => {
                 ...(createdTo && { $lte: new Date(createdTo) })
             };
         }
-
-        
-        // count total number of user's tasks
-        const totalTasks = await Task.countDocuments(query);
-        // This formula is used to calculate the number of page
-        const totalPages = Math.ceil(totalTasks / limit);
-
         // current page
         const currentPage = Math.min(page, totalPages || 1);
 
         const skip = (currentPage - 1) * limit;
+        
+        // count total number of user's tasks
+        const totalTasks = await Task.countDocuments(query);
+        const userTasks = await Task.find(query)
+            .sort(sortOptions)
+            .limit(limit)
+            .skip(skip)
+            .lean() //for the performance
+
+        // This formula is used to calculate the number of page
+        const totalPages = Math.ceil(totalTasks / limit);
+
+
 
         // 9️⃣ Navigation helpers
         const nextPage = currentPage < totalPages ? currentPage + 1 : null;
 
         const previousPage = currentPage > 1 ? currentPage - 1 : null;
 
-        const userTasks = await Task.find(query)
-            .sort(sortOptions)
-            .limit(limit)
-            .skip(skip)
 
         return res.status(200).json({
             success: true,
@@ -85,3 +172,4 @@ export const searchTasks = async (req, res) => {
     }
 }
 
+*/

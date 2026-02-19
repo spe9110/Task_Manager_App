@@ -63,16 +63,16 @@ export const fetchPaginatedTasks = async ({ queryKey }) => {
             }
         );
 
-        // if (res.status === 401 || res.status === 403) {
-        //     // Auto logout
-        //     localStorage.removeItem("userData");
-        //     window.location.href = "/login";
-        //     return;
-        // }
         if (res.status === 401 || res.status === 403) {
-            // Instead of returning undefined, return null so React Query can keep old data
-            return null;
+            // Auto logout
+            localStorage.removeItem("userData");
+            window.location.href = "/login";
+            return;
         }
+        // if (res.status === 401 || res.status === 403) {
+        //     // Instead of returning undefined, return null so React Query can keep old data
+        //     return null;
+        // }
 
         if (!res.ok) throw new Error(`Failed to fetch data: ${res.status}`);
         const result = await res.json();
