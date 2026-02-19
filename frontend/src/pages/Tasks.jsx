@@ -6,7 +6,7 @@ import { FaPlus } from "react-icons/fa6";
 import Modal from "react-modal";
 import CreateTask from "./CreateTask";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useQuery } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { fetchPaginatedTasks } from "../API/api";
 import Loader from "../components/Loader"
 import { Link } from "react-router-dom";
@@ -21,7 +21,7 @@ Modal.setAppElement("#root");
 
 const Tasks = () => {
   const { userData } = useSelector((state) => state.auth);
-   
+  // const queryClient = useQueryClient();
   // const profile = response; // <--- RTK Query gives you accurate user data
   const navigate = useNavigate();
   // Modal state
@@ -34,15 +34,20 @@ const Tasks = () => {
   const status = searchParams.get("status") || "All";
   const sort = searchParams.get("sort") || "createdAt";
   const order = searchParams.get("order") || "desc";
-
+  
+  // he user is authenticated and ready ONLY if: We have a user id - AND we have an access token"
+  const isAuthReady = Boolean(userData?.id && userData?.accessToken);
     // fetch user data using tanstack query
   const { data: tasks, isPending, isError, error } = useQuery({
     queryKey: ['tasks', userData?.id, page, limit, status, sort, order],
     // Make the queryFn read the id from queryKey
-    queryFn: fetchPaginatedTasks,
+    queryFn: fetchPaginatedTasks, // ✅ DO NOT wrap it
     // don't run the query until we have an id
-    enabled: !!userData?.id, // only run when userData.id exists
-    keepPreviousData: true
+    // enabled: !!userData?.id, // only run when userData.id exists
+    enabled: isAuthReady,
+    keepPreviousData: true,
+    retry: false, // prevent auto retries that might show blank
+    // select: (data) => data ?? queryClient.getQueryData(['tasks', userData?.id, page, limit, status, sort, order]),
   })
   
   console.log("userData", userData?.id)
@@ -139,11 +144,6 @@ const handleStatus = (e) => {
 const taskList = tasks?.data || [];
 const totalTasks = tasks?.pagination?.totalTasks ?? [];
 
-// const filteredData = useMemo(() => taskList, [taskList]);
-// console.log('data to display: ', taskList)
-
-  //✅ GOOD: This will not cause an infinite loop of re-renders because `filteredData` is memoized
-
   // create instance of table
   const table = useReactTable({
     columns,
@@ -172,7 +172,7 @@ const totalTasks = tasks?.pagination?.totalTasks ?? [];
 
         <div className="flex justify-between items-center mb-8">
           <div className="flex justify-between items-center space-x-2 border border-neutral-300 px-2 py-1 rounded-sm cursor-pointer">
-            <select defaultValue="All" className="bg-transparent cursor-pointer"
+            <select className="bg-transparent cursor-pointer"
               onChange={handleStatus}
               value={status}
             >

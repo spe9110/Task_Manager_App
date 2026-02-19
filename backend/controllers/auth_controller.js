@@ -94,14 +94,14 @@ export const loginAccount = async (req, res, next) => {
         const payload = { id: user._id, email: user.email, role: user.role };
 
         // step 6 - sign the token
-        const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }); 
+        const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE }); 
      
         // step 7 - set cookie
         res.cookie('AccessToken', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV !== 'development',
-            sameSite: 'Strict',
-            maxAge: 15 * 60 * 1000
+            sameSite: 'lax',
+            maxAge: 3600000, // 1 hour
         });
         
         logger.info("loginAccount - user logged in successfully", { userId: user._id, email });
@@ -109,7 +109,7 @@ export const loginAccount = async (req, res, next) => {
         // step 8 - return response
         res.status(200).json({
             message: "User logged in successfully",
-            token: accessToken,
+            accessToken,
             id: user._id,
             username: user.username,
             email: user.email,

@@ -1,3 +1,70 @@
+import { lazy, Suspense } from "react";
+import { Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import PrivateRoute from "./components/PrivateRoute";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+// ✅ Lazy loaded pages
+const Home = lazy(() => import("./pages/Home"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const CreateTask = lazy(() => import("./pages/CreateTask"));
+const Tasks = lazy(() => import("./pages/Tasks"));
+const SingleTask = lazy(() => import("./pages/SingleTask"));
+const UpdateTask = lazy(() => import("./pages/UpdateTask"));
+const Unauthorized = lazy(() => import("./pages/Unauthorized"));
+const Loader = lazy(() => import("./components/Loader"));
+
+
+function App() {
+  return (
+    <>
+      {/* ✅ Suspense wrapper */}
+      <Suspense fallback={<Loader />}>
+        <ErrorBoundary>
+          <ToastContainer
+            position="bottom-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            theme="colored"
+          />
+
+          <Routes>
+            <Route path="verify-email" element={<VerifyEmail />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+
+            {/* Protected Routes */}
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route element={<PrivateRoute />}>
+                <Route path="tasks" element={<Tasks />} />
+                <Route path="create-task" element={<CreateTask />} />
+                <Route path="single-task/:id" element={<SingleTask />} />
+                <Route path="update-task/:id" element={<UpdateTask />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
+            </Route>
+          </Routes>
+        </ErrorBoundary>
+      </Suspense>
+    </>
+  );
+}
+
+export default App;
+
+/*
+import { lazy, Suspense } from "react";
 import Home from "./pages/Home"
 import Profile from "./pages/Profile"
 import { Routes, Route } from "react-router-dom"
@@ -29,7 +96,6 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
-          {/* Protected Routes */}
           <Route path="/" element={<Layout />}> 
             <Route index element={<Home />} />
             <Route element={<PrivateRoute />}>
@@ -47,7 +113,7 @@ function App() {
 }
 
 export default App
-
+*/
 // npm create vite@latest
 // npm install -D tailwindcss@3 postcss autoprefixer
 // npx tailwindcss init -p
