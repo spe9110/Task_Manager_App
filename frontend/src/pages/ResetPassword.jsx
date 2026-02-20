@@ -78,11 +78,13 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="relative flex items-center justify-center h-screen px-6 sm:px-0 bg-slate-100 z-50 top-0">
-      <div className='absolute top-8 left-24'>
+    <div className="relative flex items-center justify-center h-screen px-2 sm:px-2 bg-slate-100 z-50 top-0">
+      <div className='absolute top-3 sm:top-4 left-6 lg:top-8 lg:left-24'>
         <h1
           onClick={() => navigate("/")}
-          className="text-xl xs:text-2xl sm:text-3xl font-extrabold tracking-tight text-blue-400 cursor-pointer hover:text-blue-300 transition duration-300"
+          className="absolute top-3 sm:top-4 xs:left-8 sm:left-10 
+        text-xl xs:text-2xl sm:text-3xl font-extrabold 
+        text-blue-500 cursor-pointer hover:text-blue-600 transition"
         >
           Taskly
         </h1>
@@ -91,7 +93,7 @@ const ResetPassword = () => {
       {!isEmailSent && (
         <form
           onSubmit={onSubmitEmailHandler}
-          className="bg-slate-950 p-8 rounded-lg shadow-lg w-[450px] text-sm"
+          className="bg-slate-950 p-4 rounded-lg shadow-lg w-full lg:w-[450px] text-sm"
         >
           <h1 className="text-white text-2xl font-semibold text-center mb-4">
             Reset Password
@@ -121,10 +123,10 @@ const ResetPassword = () => {
       )}
       
       {!isOtpSubmitted && isEmailSent && (
-        <form onSubmit={onSubmitOtpHandler} className='bg-slate-950 p-8 rounded-lg shadow-lg w-[450px] text-sm'>
+        <form onSubmit={onSubmitOtpHandler} className='bg-slate-950 p-8 rounded-lg shadow-lg w-full lg:w-[450px] text-sm'>
           <h1 className='text-white text-2xl font-semibold text-center mb-4'>Reset password OTP</h1>
           <p className='text-center mb-6 text-cyan-400'>Enter the 6-digit code sent to your email address</p>
-          <div onPaste={handlePaste} className="flex items-center justify-between mb-4 w-full space-x-1">
+          <div onPaste={handlePaste} className="flex items-center justify-center mb-4 w-full space-x-1">
               {Array(6)
                 .fill(0)
                 .map((_, index) => (
@@ -133,7 +135,7 @@ const ResetPassword = () => {
                     ref={(el) => (inputRefs.current[index] = el)}
                     onInput={(e) => handleInput(e, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
-                    className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-800 text-white text-center text-xl font-semibold rounded-md shadow-inner border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all duration-150"
+                    className="w-10 h-10 sm:w-14 sm:h-14 bg-gray-800 text-white text-center text-xl font-semibold rounded-md shadow-inner border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all duration-150"
                     type="text"
                     maxLength="1"
                     inputMode="numeric"
@@ -153,7 +155,7 @@ const ResetPassword = () => {
       )}
       
       {isOtpSubmitted && isEmailSent && (
-        <form onSubmit={onSubmitNewPasswordHandler} className='bg-slate-950 p-8 rounded-lg shadow-lg w-[450px] text-sm'>
+        <form onSubmit={onSubmitNewPasswordHandler} className='bg-slate-950 p-4 rounded-lg shadow-lg w-full lg:w-[450px] text-sm'>
           <h1 className='text-white text-2xl font-semibold text-center mb-4'>New password</h1>
           <p className='text-center mb-6 text-cyan-400'>Enter the new password below</p>
           <div className="relative flex items-center gap-3 w-full px-5 py-3 rounded-full bg-gray-700">

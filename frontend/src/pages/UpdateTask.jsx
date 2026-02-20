@@ -241,7 +241,7 @@ const UpdateTask = ({ closeModal }) => {
             )}
           </div>
         </div>
-        <div className="flex justify-end gap-4 p-[24px]">
+        <div className="flex flex-col justify-center items-center lg:flex-row lg:justify-end gap-4 p-[24px]">
           <button
             type="button"
             onClick={closeModal}

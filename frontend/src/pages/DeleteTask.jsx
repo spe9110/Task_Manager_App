@@ -46,7 +46,7 @@ const DeleteTask = ({ onClose }) => {
   return (
     <form
       onSubmit={handleDelete}
-      className="bg-white w-[50vw] max-w-md rounded-lg shadow-lg"
+      className="bg-white w-full max-w-md rounded-lg shadow-lg"
     >
       <div className="flex justify-end items-center w-full p-4">
         <button

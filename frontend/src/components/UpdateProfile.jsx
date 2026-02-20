@@ -164,7 +164,7 @@ const UpdateProfile = ({ onClose }) => {
         </div>
 
         {/* ACTION BUTTONS */}
-        <div className="flex justify-end gap-4">
+        <div className="flex flex-col lg:flex-row lg:justify-end gap-4">
           <button
             type="button"
             onClick={onClose}

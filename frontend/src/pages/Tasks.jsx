@@ -80,23 +80,29 @@ const Tasks = () => {
 
   const customStyles = {
     overlay: {
-      backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent black
-      zIndex: 1000, // optional: ensure it's on top
-      backdropFilter: 'blur(5px)', // This blurs what's behind the overlay
-      WebkitBackdropFilter: 'blur(5px)', // For Safari support
+      position: "fixed",
+      inset: 0, // FULL SCREEN (important)
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      backdropFilter: "blur(5px)",
+      WebkitBackdropFilter: "blur(5px)",
+      display: "flex",                // modern centering
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "16px",                // mobile safe spacing
+      zIndex: 1000,
     },
     content: {
-      top: '50%',
-      left: '50%',
-      right: 'auto',
-      bottom: 'auto',
-      marginRight: '-50%',
-      transform: 'translate(-50%, -50%)',
+      position: "relative",
+      inset: "auto",
       margin: 0,
       padding: 0,
-      boxSizing: 'border-box',
+      border: "none",
+      background: "white",
+      width: "100%",
+      maxWidth: "500px",              // desktop limit
     },
   };
+
   // columns definition and make the header clickable
 const columns = useMemo(() => [
   {
@@ -164,25 +170,73 @@ const totalTasks = tasks?.pagination?.totalTasks ?? [];
   if (isError) {
     return <div>Error: {error.message}</div>;
   }
-  
   return (
-    <div className="w-full min-h-screen flex flex-col py-24 px-[64px] bg-green-50">
-      <h1 className="text-3xl font-bold">Task to do</h1>
-      <div className="w-full h-auto border border-neutral-300 rounded-lg shadow-sm p-4">
+    <div className="
+      w-full min-h-screen
+      flex flex-col
+      py-16
+      px-4
+      xs:px-6
+      sm:px-8
+      md:px-12
+      lg:px-20
+      bg-green-50
+    ">
 
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex justify-between items-center space-x-2 border border-neutral-300 px-2 py-1 rounded-sm cursor-pointer">
-            <select className="bg-transparent cursor-pointer"
+      {/* Page Title */}
+      <h1 className="text-2xl xs:text-3xl font-bold mb-6">
+        Task to do
+      </h1>
+
+      {/* Card Container */}
+      <div className="
+        w-full
+        bg-white
+        border border-neutral-200
+        rounded-xl
+        shadow-sm
+        p-4
+        sm:p-6
+      ">
+
+        {/* Top Controls */}
+        <div className="
+          flex flex-col
+          sm:flex-row
+          sm:justify-between
+          sm:items-center
+          gap-4
+          mb-6
+        ">
+
+          {/* Status Filter */}
+          <div className="
+            w-full sm:w-auto
+            border border-neutral-300
+            px-3 py-2
+            rounded-md
+          ">
+            <select
+              className="w-full bg-transparent outline-none cursor-pointer"
               onChange={handleStatus}
               value={status}
             >
-              <option className="cursor-pointer" value="All">All Tasks</option>
-              <option className="cursor-pointer" value="Open">Open</option>
-              <option className="cursor-pointer" value="Done">Done</option>
+              <option value="All">All Tasks</option>
+              <option value="Open">Open</option>
+              <option value="Done">Done</option>
             </select>
-            {/* <IoIosArrowDown className="inline-block" /> */}
           </div>
-          <AddTaskBtn icon={<FaPlus />} value="Create New Task" onclick={handleShowCreateTaskModal} />
+
+          {/* Add Task Button */}
+          <div className="w-full sm:w-auto">
+            <AddTaskBtn
+              icon={<FaPlus />}
+              value="Create New Task"
+              onclick={handleShowCreateTaskModal}
+            />
+          </div>
+
+          {/* Modal */}
           <Modal
             isOpen={modalType === "create"}
             onRequestClose={handleCloseModal}
@@ -191,56 +245,93 @@ const totalTasks = tasks?.pagination?.totalTasks ?? [];
             <CreateTask closeModal={handleCloseModal} />
           </Modal>
         </div>
-        <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-green-400">
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id} className="border px-2 py-1 text-start">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
 
-          <tbody>
-            {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  onClick={() => navigate(`/single-task/${row.original._id}`)}
-                  className="hover:bg-neutral-200 cursor-pointer"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="border px-2 py-1">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
+        {/* Responsive Table Wrapper */}
+        <div className="w-full overflow-x-auto">
+
+          <table className="
+            min-w-[600px]
+            w-full
+            border-collapse
+            border border-gray-200
+            text-sm
+          ">
+            <thead className="bg-green-400 text-white">
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th
+                      key={header.id}
+                      className="border px-3 py-2 text-left whitespace-nowrap"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
                   ))}
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={columns.length}>
-                  <div className="flex flex-col items-center justify-center py-10">
-                    <img src={EmptyFolder} alt="empty folder" className="w-16 h-16 mb-4" />
-                    <p className="text-gray-500">No tasks found</p>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
+              ))}
+            </thead>
 
-        </table>
+            <tbody className="bg-white">
+              {table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    onClick={() =>
+                      navigate(`/single-task/${row.original._id}`)
+                    }
+                    className="hover:bg-neutral-100 cursor-pointer transition"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className="border px-3 py-2 whitespace-nowrap"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={columns.length}>
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <img
+                        src={EmptyFolder}
+                        alt="empty folder"
+                        className="w-14 h-14 mb-4 opacity-60"
+                      />
+                      <p className="text-gray-500">
+                        No tasks found
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+        </div>
       </div>
-      <div className="pagination w-full flex justify-between items-center mt-2">
 
-        {/* ✅ Pagination Component */}
+      {/* Pagination Section */}
+      <div className="
+        w-full
+        flex flex-col
+        sm:flex-row
+        sm:justify-between
+        sm:items-center
+        gap-4
+        mt-6
+      ">
+
         <Pagination
           itemCount={totalTasks}
           pageSize={limit}
@@ -248,24 +339,128 @@ const totalTasks = tasks?.pagination?.totalTasks ?? [];
           onPageChange={changePage}
         />
 
-        {/* ✅ Limit Selector */}
-        <div className="flex-2 mt-4">
+        <div>
           <select
             value={limit}
             onChange={(e) => changeLimit(Number(e.target.value))}
-            className="border p-2"
+            className="border rounded-md px-3 py-2"
           >
             <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={20}>20</option>
           </select>
         </div>
+
       </div>
     </div>
-  )
+  );
+  
 }
 
 export default Tasks
+
+
+/*
+
+
+return (
+  <div className="w-full min-h-screen flex flex-col py-24 px-[64px] bg-green-50">
+    <h1 className="text-3xl font-bold">Task to do</h1>
+    <div className="w-full h-auto border border-neutral-300 rounded-lg shadow-sm p-4">
+
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center space-x-2 border border-neutral-300 px-2 py-1 rounded-sm cursor-pointer">
+          <select className="bg-transparent cursor-pointer"
+            onChange={handleStatus}
+            value={status}
+          >
+            <option className="cursor-pointer" value="All">All Tasks</option>
+            <option className="cursor-pointer" value="Open">Open</option>
+            <option className="cursor-pointer" value="Done">Done</option>
+          </select>
+        </div>
+        <AddTaskBtn icon={<FaPlus />} value="Create New Task" onclick={handleShowCreateTaskModal} />
+        <Modal
+          isOpen={modalType === "create"}
+          onRequestClose={handleCloseModal}
+          style={customStyles}
+        >
+          <CreateTask closeModal={handleCloseModal} />
+        </Modal>
+      </div>
+      <table className="w-full border-collapse border border-gray-300">
+        <thead className="bg-green-400">
+          {table.getHeaderGroups().map(headerGroup => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map(header => (
+                <th key={header.id} className="border px-2 py-1 text-start">
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+
+        <tbody>
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                onClick={() => navigate(`/single-task/${row.original._id}`)}
+                className="hover:bg-neutral-200 cursor-pointer"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="border px-2 py-1">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={columns.length}>
+                <div className="flex flex-col items-center justify-center py-10">
+                  <img src={EmptyFolder} alt="empty folder" className="w-16 h-16 mb-4" />
+                  <p className="text-gray-500">No tasks found</p>
+                </div>
+              </td>
+            </tr>
+          )}
+        </tbody>
+
+      </table>
+    </div>
+    <div className="pagination w-full flex justify-between items-center mt-2">
+
+      <Pagination
+        itemCount={totalTasks}
+        pageSize={limit}
+        currentPage={page}
+        onPageChange={changePage}
+      />
+
+      <div className="flex-2 mt-4">
+        <select
+          value={limit}
+          onChange={(e) => changeLimit(Number(e.target.value))}
+          className="border p-2"
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+        </select>
+      </div>
+    </div>
+  </div>
+)
+*/ 
+
+
 
 
 /*
