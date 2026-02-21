@@ -171,20 +171,10 @@ const totalTasks = tasks?.pagination?.totalTasks ?? [];
     return <div>Error: {error.message}</div>;
   }
   return (
-    <div className="
-      w-full min-h-screen
-      flex flex-col
-      py-16
-      px-4
-      xs:px-6
-      sm:px-8
-      md:px-12
-      lg:px-20
-      bg-green-50
-    ">
+    <div className="w-full min-h-screen flex flex-col justify-center items-center py-16 px-4 xs:px-6 sm:px-8 md:px-12 lg:px-[64px] xl:px-[100px] 2xl:px-[200px] bg-green-50">
 
       {/* Page Title */}
-      <h1 className="text-2xl xs:text-3xl font-bold mb-6">
+      <h1 className="text-2xl xs:text-3xl font-bold my-6 mt-12">
         Task to do
       </h1>
 

@@ -39,12 +39,7 @@ export const fetchPaginatedTasks = async ({ queryKey }) => {
         }
         console.log("Token being sent:", token);
         // Build query params dynamically
-        const params = new URLSearchParams({
-            page,
-            limit,
-            sort,
-            order
-        });
+        const params = new URLSearchParams({ page, limit, sort, order });
 
         // Only add status if it's not "All"
         if (status && status !== "All") {
@@ -117,6 +112,12 @@ export const fetchSingleUserTask = async ({ queryKey }) => {
       Authorization: `Bearer ${token}`,
     },
   });
+    if (res.status === 401 || res.status === 403) {
+        // Auto logout
+        localStorage.removeItem("userData");
+        window.location.href = "/login";
+        return;
+    }
 
   if (!res.ok) throw new Error(`Failed to fetch data: ${res.status}`);
 

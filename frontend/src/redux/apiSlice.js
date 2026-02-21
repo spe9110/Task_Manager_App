@@ -6,7 +6,8 @@ const baseQuery = fetchBaseQuery({
     baseUrl: API_BASE_URL || 'http://localhost:5000', // Use environment variable for base URL
     credentials: 'include', // Include cookies or credentials
     prepareHeaders: (headers, { getState }) => {
-        const token = getState().auth.userData?.token; // Fetch token from Redux state
+        // const token = getState().auth.userData?.token; // Fetch token from Redux state
+         const token = getState().auth.userData?.accessToken;
         if (token) {
             headers.set('Authorization', `Bearer ${token}`); // Set Authorization header
         }
@@ -21,8 +22,8 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
         if (result?.error?.status === 401) {
             // Instead of logout or redirect, just return the error
-            console.warn('⚠️ Unauthorized — API returned 401, user stays logged in');
-            return { error: { status: 401, message: 'Unauthorized' } };
+            localStorage.removeItem("userData");
+            window.location.href = "/login";
         }
 
         return result;

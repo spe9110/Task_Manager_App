@@ -40,30 +40,33 @@ const Profile = () => {
     setModalType(null);
   }, []);
 
-const customStyles = {
-  overlay: {
-    position: "fixed",
-    inset: 0, // FULL SCREEN (important)
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    backdropFilter: "blur(5px)",
-    WebkitBackdropFilter: "blur(5px)",
-    display: "flex",                // modern centering
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "16px",                // mobile safe spacing
-    zIndex: 1000,
-  },
-  content: {
-    position: "relative",
-    inset: "auto",
-    margin: 0,
-    padding: 0,
-    border: "none",
-    background: "transparent",
-    width: "100%",
-    maxWidth: "500px",              // desktop limit
-  },
-};
+  const customStyles = {
+    overlay: {
+      position: "fixed",
+      inset: 0, // FULL SCREEN (important)
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      backdropFilter: "blur(5px)",
+      WebkitBackdropFilter: "blur(5px)",
+      display: "flex",                // modern centering
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "8px",                // mobile safe spacing
+      zIndex: 1000,
+    },
+    content: {
+      position: "relative",
+      inset: "auto",
+      margin: 0,
+      padding: 0,
+      display: "flex",                // modern centering
+      alignItems: "center",
+      justifyContent: "center",
+      border: "none",
+      background: "transparent",
+      width: "100%",
+      maxWidth: "500px",              // desktop limit
+    },
+  };
 
   // Loading UI
   if (fetching) {
@@ -188,7 +191,7 @@ const customStyles = {
         </p>
 
         {/* Buttons */}
-        <div className="w-full flex flex-col gap-3 mt-4">
+        <div className="w-full flex flex-col lg:flex-row justify-center items-center gap-3 mt-4">
           <button
             onClick={handleShowModalProfile}
             className="

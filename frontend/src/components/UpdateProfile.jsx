@@ -110,7 +110,7 @@ const UpdateProfile = ({ onClose }) => {
   }
 
   return (
-    <div className="relative bg-white w-[40vw] min-w-[340px] p-6 shadow-lg rounded-lg">
+    <div className="bg-white w-[100%] sm:max-w-md md:max-w-lg rounded-2xl shadow-2xl border border-gray-200 p-6">
 
       {/* Close button */}
       <button

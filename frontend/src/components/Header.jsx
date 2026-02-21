@@ -176,7 +176,7 @@ const Header = () => {
 
           {/* Drawer */}
           <div
-            className={`fixed top-0 right-0 h-full w-[60%] bg-black text-white shadow-xl transform transition-transform duration-300 ease-in-out md:hidden z-50 ${
+            className={`fixed top-0 right-0 h-full w-[70%] bg-black text-white shadow-xl transform transition-transform duration-300 ease-in-out md:hidden z-50 ${
               openMobile ? "translate-x-0" : "translate-x-full"
             }`}
           >
@@ -215,7 +215,7 @@ const Header = () => {
                     </div>
 
                     {/* Divider */}
-                    <div className="h-px w-full bg-neutral-700" />
+                    {/* <div className="h-px w-full bg-neutral-700" /> */}
 
 
                   {/* Verify Email */}
@@ -242,7 +242,7 @@ const Header = () => {
                   </Link>
 
                   {/* Divider */}
-                  <div className="absolute bottom-[10%] h-px bg-neutral-700"></div>
+                  <div className="absolute bottom-[15%] sm:bottom-[12%] w-full h-px bg-neutral-700"></div>
 
                   {/* Logout */}
                   <button
