@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite'
-import { analyzer } from 'vite-bundle-analyzer'
+// import { analyzer } from 'vite-bundle-analyzer'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    analyzer()
+    // analyzer()
   ],
   server: {
     port: 5173,
@@ -17,7 +17,7 @@ export default defineConfig({
     },
     proxy: {
       '/api/v1': {
-        target: 'https://task-manager-app-ohyg.onrender.com', // use service name, not localhost
+        target: 'https://task-manager-server-bukb.onrender.com', // use service name, not localhost
         changeOrigin: true,
       },
     },

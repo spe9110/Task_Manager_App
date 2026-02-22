@@ -3,7 +3,7 @@ import { API_BASE_URL } from '../../Util.js'; // Import the base URL from enviro
 
 // Base query configuration with error handling and authentication
 const baseQuery = fetchBaseQuery({
-    baseUrl: API_BASE_URL || 'http://localhost:5000', // Use environment variable for base URL
+    baseUrl: API_BASE_URL || 'https://task-manager-server-bukb.onrender.com', // Use environment variable for base URL
     credentials: 'include', // Include cookies or credentials
     prepareHeaders: (headers, { getState }) => {
         // const token = getState().auth.userData?.token; // Fetch token from Redux state
