@@ -17,7 +17,7 @@ export default defineConfig({
     },
     proxy: {
       '/api/v1': {
-        target: 'http://backend:5000', // use service name, not localhost
+        target: 'https://task-manager-app-ohyg.onrender.com', // use service name, not localhost
         changeOrigin: true,
       },
     },
