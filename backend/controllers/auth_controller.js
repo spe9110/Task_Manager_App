@@ -99,7 +99,7 @@ export const loginAccount = async (req, res, next) => {
         // step 7 - set cookie
         res.cookie('AccessToken', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
+            secure: true,
             sameSite: 'lax',
             maxAge: 3600000, // 1 hour
         });
@@ -131,8 +131,8 @@ export const logoutAccount = async (req, res, next) => {
         // Clear the cookie
         res.clearCookie('AccessToken', {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
-            sameSite: 'Strict'
+            secure: true,
+            sameSite: 'lax'
         });
         
         logger.info("logoutAccount - user logged out successfully", { userId: req.user?.id || "anonymous" });
