@@ -84,12 +84,12 @@ const Header = () => {
       <div className="flex justify-between items-center h-full px-4 sm:px-8 lg:px-16">
         
         {/* Logo */}
-        <h1
-          onClick={() => navigate("/")}
+        <Link
+          to={"/"}
           className="text-2xl sm:text-3xl font-extrabold text-blue-400 cursor-pointer hover:text-blue-300 transition"
         >
           Taskly
-        </h1>
+        </Link>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6">

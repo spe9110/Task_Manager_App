@@ -28,16 +28,7 @@ const DeleteAccount = ({ onClose, id }) => {
     return (
         <form
             onSubmit={handleDelete}
-            className="
-        bg-white
-        w-[100%]
-        sm:max-w-md
-        md:max-w-lg
-        rounded-2xl
-        shadow-2xl
-        border border-gray-200
-      "
-        >
+            className="bg-white w-[100%] sm:max-w-md md:max-w-lg rounded-2xl shadow-2xl border border-gray-200">
 
             {/* Close Button */}
             <div className="flex justify-end items-center p-4 xs:p-6">

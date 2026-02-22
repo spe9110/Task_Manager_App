@@ -1,6 +1,7 @@
 import React from "react";
 import { FaAnglesLeft, FaAngleLeft, FaAngleRight, FaAnglesRight } from "react-icons/fa6";
 
+// server-side pagination
 function Pagination({ itemCount, pageSize, currentPage, onPageChange }) {
   const pageCount = Math.ceil(itemCount / pageSize);
 

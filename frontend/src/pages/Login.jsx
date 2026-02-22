@@ -58,23 +58,29 @@ const Login = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen flex items-center justify-center 
-      px-4 xs:px-6 sm:px-8 md:px-12 lg:px-20
-      bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 overflow-hidden">
+    <div className="relative w-full min-h-screen flex items-center justify-center px-4 xs:px-6 sm:px-8 md:px-12 lg:px-20
+bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 overflow-hidden">
 
-      {/* 🌫️ Background Blur Circles */}
-      <div className="absolute -top-32 -left-32 w-[300px] h-[300px] bg-blue-300/30 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-cyan-200/30 rounded-full blur-3xl"></div>
+      {/* Background decorative */}
+      <div aria-hidden="true"
+        className="absolute -top-32 -left-32 w-[300px] h-[300px] 
+        bg-blue-300/30 rounded-full blur-3xl">
+      </div>
 
+      <div aria-hidden="true"
+        className="absolute bottom-0 right-0 w-[400px] h-[400px] 
+        bg-cyan-200/30 rounded-full blur-3xl">
+      </div>
       {/* 🔷 Logo */}
-      <h1
-        onClick={() => navigate("/")}
+      <Link
+        to="/"
         className="absolute top-3 sm:top-4 left-6 xs:left-8 sm:left-10 
         text-xl xs:text-2xl sm:text-3xl font-extrabold 
-        text-blue-500 cursor-pointer hover:text-blue-600 transition"
+        text-blue-700 hover:text-blue-800 transition
+        focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
       >
         Taskly
-      </h1>
+      </Link>
 
       {/* 🧊 Login Card */}
       <div className="relative mt-8 z-10 w-full 
@@ -92,38 +98,67 @@ const Login = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
 
           {/* Email */}
-          <div>
-            <input
-              type="email"
-              placeholder="Email address"
-              className={`w-full rounded-lg px-4 py-3 border text-sm xs:text-base focus:outline-none focus:ring-2 focus:ring-blue-400 transition
-              ${errors.email ? "border-red-500" : "border-gray-300"}`}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-xs text-red-500 mt-1">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
+        <div>
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Email address
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="spencer@hotmail.com"
+            aria-invalid={errors.email ? "true" : "false"}
+            aria-describedby={errors.email ? "email-error" : undefined}
+            className={`w-full rounded-lg px-4 py-3 border text-sm xs:text-base
+            focus:outline-none focus:ring-2 focus:ring-blue-600
+            ${errors.email ? "border-red-600" : "border-gray-300"}`}
+            {...register("email")}
+          />
+
+          {errors.email && (
+            <p id="email-error" className="text-xs text-red-600 mt-1">
+              {errors.email.message}
+            </p>
+          )}
+        </div>
 
           {/* Password */}
           <div className="relative">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Password
+            </label>
+
             <input
+              id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              className={`w-full rounded-lg px-4 py-3 border text-sm xs:text-base focus:outline-none focus:ring-2 focus:ring-blue-400 transition
-              ${errors.password ? "border-red-500" : "border-gray-300"}`}
+              placeholder="Wax123@"
+              autoComplete="current-password"
+              aria-invalid={errors.password ? "true" : "false"}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              className={`w-full rounded-lg px-4 py-3 border text-sm xs:text-base
+              focus:outline-none focus:ring-2 focus:ring-blue-600
+              ${errors.password ? "border-red-600" : "border-gray-300"}`}
               {...register("password")}
             />
 
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/3 lg:top-1/3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              className="absolute right-4 top-1/2 -translate-y-1/2
+              text-gray-600 hover:text-gray-800
+              focus:outline-none focus:ring-2 focus:ring-blue-600 rounded"
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>

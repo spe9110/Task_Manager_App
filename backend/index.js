@@ -15,6 +15,8 @@ import helmet from "helmet"
 import mongoose from 'mongoose';
 import taskRoute from "./routes/task_route.js";
 import fs from "fs";
+import { generateSiteMap } from './generateSiteMap.js';
+import compression from "compression";
 
 // Connect to the database
 dbConnect();
@@ -31,16 +33,40 @@ if (!fs.existsSync(uploadDir)) {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+// Trust Proxy (If Using Render, Railway, K8s) - Important for: secure cookies, rate limiting, IP detection
+app.set("trust proxy", 1);
 
 // Enable cors
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true, 
 }));
+
+// sitemap caching
+let sitemapCache = null;
+let lastGenerated = 0;
+
+app.get("/sitemap.xml", (req, res) => {
+  const now = Date.now();
+
+  // regenerate every 10 minutes
+  if (!sitemapCache || now - lastGenerated > 10 * 60 * 1000) {
+    sitemapCache = generateSiteMap();
+    lastGenerated = now;
+  }
+
+  res.header("Content-Type", "application/xml");
+  res.send(sitemapCache);
+});
+
+// sitemap
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Middleware for parsing cookies
 app.use(cookieParser());
+// Reduces response size 60–80%.
+app.use(compression());
 
 //Morgan for logging
 app.use(morgan('dev'));
@@ -98,3 +124,5 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 // npm i bcrypt cookie-parser express-jwt jsonwebtoken
 // npm i prom-client
 // npm i winston-daily-rotate-file uuid node-cache
+// npm i slug
+// npm install compression

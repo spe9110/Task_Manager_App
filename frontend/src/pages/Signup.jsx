@@ -59,76 +59,72 @@ const Signup = () => {
   };
 
   return (
-    <div className="
-      relative w-full min-h-screen
-      flex items-center justify-center
-      px-3
-      xs:px-4
-      sm:px-6
-      md:px-10
-      lg:px-16
-      bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50
-      overflow-hidden
-    ">
+    <div className="relative w-full min-h-screen flex items-center justify-center px-4 xs:px-6 sm:px-8 md:px-12 lg:px-20
+bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 overflow-hidden">
 
-      {/* Background Blur Effects */}
-      <div className="absolute -top-32 -left-32 w-64 h-64 xs:w-72 xs:h-72 md:w-96 md:h-96 bg-blue-300/30 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-0 w-72 h-72 md:w-[400px] md:h-[400px] bg-cyan-200/30 rounded-full blur-3xl"></div>
+      {/* Background decorative */}
+      <div aria-hidden="true"
+        className="absolute -top-32 -left-32 w-[300px] h-[300px] 
+        bg-blue-300/30 rounded-full blur-3xl">
+      </div>
 
-      {/* Logo */}
-      <h1
-        onClick={() => navigate("/")}
-        className="
-          absolute top-3 sm:top-4 left-4
-          xs:left-6
-          text-lg
-          xs:text-xl
-          sm:text-2xl
-          md:text-3xl
-          font-extrabold text-blue-500 cursor-pointer
-        "
+      <div aria-hidden="true"
+        className="absolute bottom-0 right-0 w-[400px] h-[400px] 
+        bg-cyan-200/30 rounded-full blur-3xl">
+      </div>
+
+      {/* 🔷 Logo */}
+      <Link
+        to="/"
+        className="absolute top-3 sm:top-4 left-6 xs:left-8 sm:left-10 
+        text-xl xs:text-2xl sm:text-3xl font-extrabold 
+        text-blue-700 hover:text-blue-800 transition
+        focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
       >
         Taskly
-      </h1>
-
+      </Link>
       {/* Signup Card */}
       <div className="relative z-10 w-full max-w-[320px] xs:max-w-sm sm:max-w-md md:max-w-lg p-5 xs:p-6 sm:p-8 md:p-10 bg-white/70 backdrop-blur-xl
         shadow-xl rounded-2xl border border-white/40 mt-8">
 
-        <div className="text-center mb-5">
-          <h2 className="
-            text-lg
-            xs:text-xl
-            sm:text-2xl
-            font-bold text-gray-800
-          ">
+      <header className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">
             Create Account
-          </h2>
-
-          <p className="text-xs xs:text-sm text-gray-600 mt-1">
+          </h1>
+          <p className="text-sm text-gray-700 mt-1">
             Please fill the form below
           </p>
-        </div>
+        </header>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
 
           {/* Username */}
           <div>
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Username
+            </label>
+
             <input
+              id="username"
               type="text"
-              placeholder="Username"
-              className="
-                w-full rounded-lg
-                px-3 py-2
-                xs:px-4 xs:py-3
-                text-sm xs:text-base
-                border border-gray-300
-                focus:outline-none focus:ring-2 focus:ring-blue-400
-              "
+              autoComplete="username"
+              placeholder="Spencer"
+              aria-invalid={errors.username ? "true" : "false"}
+              aria-describedby={errors.username ? "username-error" : undefined}
+              className={`w-full rounded-lg px-4 py-3 border
+              focus:outline-none focus:ring-2 focus:ring-blue-600
+              ${errors.username ? "border-red-600" : "border-gray-300"}`}
               {...register("username")}
             />
+
             {errors.username && (
-              <p className="text-xs text-red-500 mt-1">
+              <p
+                id="username-error"
+                className="text-sm text-red-600 mt-1"
+              >
                 {errors.username.message}
               </p>
             )}
@@ -136,21 +132,31 @@ const Signup = () => {
 
           {/* Email */}
           <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Email address
+            </label>
+
             <input
+              id="email"
               type="email"
-              placeholder="Email address"
-              className="
-                w-full rounded-lg
-                px-3 py-2
-                xs:px-4 xs:py-3
-                text-sm xs:text-base
-                border border-gray-300
-                focus:outline-none focus:ring-2 focus:ring-blue-400
-              "
+              autoComplete="email"
+              placeholder="spencer@hotmail.com"
+              aria-invalid={errors.email ? "true" : "false"}
+              aria-describedby={errors.email ? "email-error" : undefined}
+              className={`w-full rounded-lg px-4 py-3 border
+              focus:outline-none focus:ring-2 focus:ring-blue-600
+              ${errors.email ? "border-red-600" : "border-gray-300"}`}
               {...register("email")}
             />
+
             {errors.email && (
-              <p className="text-xs text-red-500 mt-1">
+              <p
+                id="email-error"
+                className="text-sm text-red-600 mt-1"
+              >
                 {errors.email.message}
               </p>
             )}
@@ -158,28 +164,43 @@ const Signup = () => {
 
           {/* Password */}
           <div className="relative">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Password
+            </label>
+
             <input
+              id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              className="
-                w-full rounded-lg
-                px-3 py-2
-                xs:px-4 xs:py-3
-                text-sm xs:text-base
-                border border-gray-300
-                focus:outline-none focus:ring-2 focus:ring-blue-400
-              "
+              autoComplete="new-password"
+              placeholder="Wax123456@"
+              aria-invalid={errors.password ? "true" : "false"}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              className={`w-full rounded-lg px-4 py-3 border
+              focus:outline-none focus:ring-2 focus:ring-blue-600
+              ${errors.password ? "border-red-600" : "border-gray-300"}`}
               {...register("password")}
             />
+
             <button
               type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              className="absolute right-3 top-1/2 translate-y-1/2
+              text-gray-600 hover:text-gray-800
+              focus:outline-none focus:ring-2 focus:ring-blue-600 rounded"
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
+
             {errors.password && (
-              <p className="text-xs text-red-500 mt-1">
+              <p
+                id="password-error"
+                className="text-sm text-red-600 mt-1"
+              >
                 {errors.password.message}
               </p>
             )}
@@ -187,28 +208,51 @@ const Signup = () => {
 
           {/* Confirm Password */}
           <div className="relative">
+            <label
+              htmlFor="password_confirm"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Confirm password
+            </label>
+
             <input
+              id="password_confirm"
               type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm Password"
-              className="
-                w-full rounded-lg
-                px-3 py-2
-                xs:px-4 xs:py-3
-                text-sm xs:text-base
-                border border-gray-300
-                focus:outline-none focus:ring-2 focus:ring-blue-400
-              "
+              placeholder="Wax123456@"
+              autoComplete="new-password"
+              aria-invalid={errors.password_confirm ? "true" : "false"}
+              aria-describedby={
+                errors.password_confirm ? "confirm-error" : undefined
+              }
+              className={`w-full rounded-lg px-4 py-3 border
+              focus:outline-none focus:ring-2 focus:ring-blue-600
+              ${errors.password_confirm ? "border-red-600" : "border-gray-300"}`}
               {...register("password_confirm")}
             />
+
             <button
               type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 lg:top-1/2 -translate-y-1/2 text-gray-500"
+              aria-label={
+                showConfirmPassword
+                  ? "Hide confirm password"
+                  : "Show confirm password"
+              }
+              aria-pressed={showConfirmPassword}
+              onClick={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
+              className="absolute right-3 top-1/2 translate-y-1/2
+              text-gray-600 hover:text-gray-800
+              focus:outline-none focus:ring-2 focus:ring-blue-600 rounded"
             >
               {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
+
             {errors.password_confirm && (
-              <p className="text-xs text-red-500 mt-1">
+              <p
+                id="confirm-error"
+                className="text-sm text-red-600 mt-1"
+              >
                 {errors.password_confirm.message}
               </p>
             )}
@@ -218,36 +262,28 @@ const Signup = () => {
           <button
             type="submit"
             disabled={isSubmitting || isLoading}
-            className="
-              w-full
-              py-2
-              xs:py-3
-              text-sm xs:text-base
-              bg-gradient-to-r from-blue-500 to-cyan-400
-              text-white font-semibold
-              rounded-lg
-              hover:scale-[1.02]
-              transition
-            "
+            className="w-full py-3
+            bg-blue-700 text-white font-semibold rounded-lg
+            hover:bg-blue-800
+            focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2
+            disabled:opacity-50"
           >
-            {isSubmitting || isLoading ? "Creating..." : "Sign Up"}
+            {isSubmitting || isLoading
+              ? "Creating account..."
+              : "Sign Up"}
           </button>
         </form>
 
-        <div className="
-          mt-5
-          text-xs
-          xs:text-sm
-          text-center text-gray-600
-        ">
+        <p className="mt-6 text-sm text-center text-gray-700">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-blue-500 hover:underline font-medium"
+            className="text-blue-700 font-medium hover:underline
+            focus:outline-none focus:ring-2 focus:ring-blue-600"
           >
             Login
           </Link>
-        </div>
+        </p>
       </div>
     </div>
   );

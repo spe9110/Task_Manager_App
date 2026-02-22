@@ -6,6 +6,9 @@ import { authForRoles } from '../middleware/authorize.js';
 
 const router = express.Router();
 
+// get all tasks
+// router.get('/tasks', userAuth, authForRoles('admin'), )
+
 // @desc    Get all tasks with caching
 // @route   GET /api/v1/tasks
 // @access  PRIVATE
@@ -24,12 +27,12 @@ router.get('/:id', userAuth, authForRoles(['user', 'admin']), getTaskById);
 // @desc    Create a new task
 // @route   POST /api/v1/tasks
 // @access  PRIVATE
-router.post('/create', userAuth, authForRoles('user'), createTask);
+router.post('/create', userAuth, authForRoles(['user', 'admin']), createTask);
 
 // @desc    Update a task
 // @route   PUT /api/v1/tasks/:id
 // @access  PRIVATE
-router.put('/update/:id', userAuth, authForRoles('user'), updateTask);
+router.put('/update/:id', userAuth, authForRoles(['user', 'admin']), updateTask);
 
 // @desc    Delete a task
 // @route   DELETE /api/v1/tasks/:id

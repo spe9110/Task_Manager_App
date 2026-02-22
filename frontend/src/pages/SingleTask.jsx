@@ -105,86 +105,117 @@ const SingleTask = () => {
       </div>
     );
   }
-
   return (
-    <div className="w-full min-h-screen flex flex-col justify-center items-center px-4 xs:px-6 sm:px-8 md:px-12 lg:px-20 xl:px-32 2xl:px-40 py-12 bg-slate-50">
+    <div
+      className="w-full min-h-screen flex flex-col justify-center items-center
+      px-4 xs:px-6 sm:px-8 md:px-12 lg:px-20 xl:px-32 2xl:px-40
+      py-12 bg-slate-50 mt-12 lg:mt-24"
+    >
 
       {/* Go Back Button */}
       <button
         type="button"
         onClick={() => navigate(-1)}
         style={styleGoBack}
-        aria-label="Go back"
-        className='left-[12px] lg:left-[64px]'
+        className="left-[12px] lg:left-[64px]
+        flex items-center gap-2
+        text-blue-700
+        focus:outline-none focus:ring-2 focus:ring-blue-600 rounded"
       >
-        <FaAngleLeft className='text-blue-400' size={20} />
-        <span className='text-blue-400'>All Tasks</span>
+        <FaAngleLeft
+          className="text-blue-700"
+          size={20}
+          aria-hidden="true"
+        />
+        <span>All Tasks</span>
       </button>
 
       {/* Task Card */}
-      <div className="
-        w-full
+      <article
+        className="w-full
         max-w-sm xs:max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl
         bg-white border border-neutral-200 rounded-2xl shadow-md
         p-4 xs:p-6 sm:p-8
-        flex flex-col
-        gap-6 mt-20 sm:mt-10
-      ">
+        flex flex-col gap-6 mt-18 sm:mt-20 md:mt-24 lg:mt-28"
+      >
 
         {/* Task Title */}
-        <h1 className="
-          text-lg xs:text-xl sm:text-2xl md:text-3xl
-          font-bold break-words
-        ">
+        <h1
+          id="task-title"
+          className="text-lg xs:text-xl sm:text-2xl md:text-3xl
+          font-bold break-words text-gray-900"
+        >
           {task.name}
         </h1>
 
         {/* Status + Due Date */}
         <div className="flex flex-row justify-between items-center gap-2">
-          <span className={`px-3 py-1 rounded-full text-white text-sm font-semibold w-fit ${
-            task.status === "Open" ? "bg-orange-500" :
-            task.status === "Closed" ? "bg-green-500" :
-            task.status === "Pending" ? "bg-yellow-500" : "bg-gray-500"
-          }`}>
+          <span
+            role="status"
+            className={`px-3 py-1 rounded-full text-sm font-semibold w-fit
+            ${
+              task.status === "Open"
+                ? "bg-orange-600 text-white"
+                : task.status === "Closed"
+                ? "bg-green-700 text-white"
+                : task.status === "Pending"
+                ? "bg-yellow-600 text-black"
+                : "bg-gray-600 text-white"
+            }`}
+          >
             {task.status}
           </span>
-          <p className="text-gray-600 text-sm sm:text-base">
-            Due: {new Date(task.due).toLocaleDateString()}
-          </p>
+
+          <p>{new Date(task.due).toLocaleDateString()}</p>
+
         </div>
 
         {/* Task Description */}
-        <div className="
-          border border-neutral-300 rounded-lg p-3 xs:p-4 sm:p-6
+        <section
+          className="border border-neutral-300 rounded-lg
+          p-3 xs:p-4 sm:p-6
           text-gray-700 text-sm sm:text-base
-          leading-relaxed whitespace-pre-wrap break-words
-        ">
+          leading-relaxed whitespace-pre-wrap break-words"
+        >
           {task.description}
-        </div>
+        </section>
 
         {/* Action Buttons */}
         <div className="flex flex-row justify-between items-center gap-3 mt-4">
           <button
             onClick={handleShowDeleteTaskModal}
-            className="w-full sm:w-auto text-red-600 font-semibold hover:underline transition"
+            type='button'
+            aria-label={`Delete task ${task.name}`}
+            className="w-full sm:w-auto
+            text-red-700 font-semibold
+            hover:underline
+            focus:outline-none focus:ring-2 focus:ring-red-600 rounded"
           >
             Delete Task
           </button>
+
           <button
+            type='button'
             onClick={handleShowUpdateTaskModal}
-            className="w-full sm:w-auto text-green-600 font-semibold hover:underline transition"
+            aria-label={`Edit task ${task.name}`}
+            className="w-full sm:w-auto
+            text-green-700 font-semibold
+            hover:underline
+            focus:outline-none focus:ring-2 focus:ring-green-600 rounded"
           >
             Edit Task
           </button>
-        </div>
 
-      </div>
+        </div>
+      </article>
 
       {/* Delete Modal */}
       <Modal
         isOpen={modalType === "delete"}
         onRequestClose={handleCloseModal}
         style={customStyles}
+        contentLabel="Delete Task Modal"
+        ariaHideApp={false}
       >
         <DeleteTask onClose={handleCloseModal} />
       </Modal>
@@ -194,6 +225,8 @@ const SingleTask = () => {
         isOpen={modalType === "update"}
         onRequestClose={handleCloseModal}
         style={customStyles}
+        contentLabel="Update Task Modal"
+        ariaHideApp={false}
       >
         <UpdateTask closeModal={handleCloseModal} />
       </Modal>
@@ -204,6 +237,95 @@ const SingleTask = () => {
 
 export default SingleTask
 
+/*
+return (
+  <div className="w-full min-h-screen flex flex-col justify-center items-center px-4 xs:px-6 sm:px-8 md:px-12 lg:px-20 xl:px-32 2xl:px-40 py-12 bg-slate-50">
+
+    <button
+      type="button"
+      onClick={() => navigate(-1)}
+      style={styleGoBack}
+      aria-label="Go back"
+      className='left-[12px] lg:left-[64px]'
+    >
+      <FaAngleLeft className='text-blue-400' size={20} />
+      <span className='text-blue-400'>All Tasks</span>
+    </button>
+
+    <div className="
+      w-full
+      max-w-sm xs:max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl
+      bg-white border border-neutral-200 rounded-2xl shadow-md
+      p-4 xs:p-6 sm:p-8
+      flex flex-col
+      gap-6 mt-20 sm:mt-10
+    ">
+
+      <h1 className="
+        text-lg xs:text-xl sm:text-2xl md:text-3xl
+        font-bold break-words
+      ">
+        {task.name}
+      </h1>
+
+      <div className="flex flex-row justify-between items-center gap-2">
+        <span className={`px-3 py-1 rounded-full text-white text-sm font-semibold w-fit ${
+          task.status === "Open" ? "bg-orange-500" :
+          task.status === "Closed" ? "bg-green-500" :
+          task.status === "Pending" ? "bg-yellow-500" : "bg-gray-500"
+        }`}>
+          {task.status}
+        </span>
+        <p className="text-gray-600 text-sm sm:text-base">
+          Due: {new Date(task.due).toLocaleDateString()}
+        </p>
+      </div>
+
+      <div className="
+        border border-neutral-300 rounded-lg p-3 xs:p-4 sm:p-6
+        text-gray-700 text-sm sm:text-base
+        leading-relaxed whitespace-pre-wrap break-words
+      ">
+        {task.description}
+      </div>
+
+      <div className="flex flex-row justify-between items-center gap-3 mt-4">
+        <button
+          onClick={handleShowDeleteTaskModal}
+          className="w-full sm:w-auto text-red-600 font-semibold hover:underline transition"
+        >
+          Delete Task
+        </button>
+        <button
+          onClick={handleShowUpdateTaskModal}
+          className="w-full sm:w-auto text-green-600 font-semibold hover:underline transition"
+        >
+          Edit Task
+        </button>
+      </div>
+
+    </div>
+
+    <Modal
+      isOpen={modalType === "delete"}
+      onRequestClose={handleCloseModal}
+      style={customStyles}
+    >
+      <DeleteTask onClose={handleCloseModal} />
+    </Modal>
+
+    <Modal
+      isOpen={modalType === "update"}
+      onRequestClose={handleCloseModal}
+      style={customStyles}
+    >
+      <UpdateTask closeModal={handleCloseModal} />
+    </Modal>
+
+  </div>
+);
+
+*/ 
 
 /*
 

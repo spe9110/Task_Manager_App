@@ -1,10 +1,7 @@
-version: "3.9"
-
 services:
   mongo:
-    image: mongo:latest
-    restart: always
-    container_name: mongo
+    image: mongo:8.2
+    container_name: task-mongo
     ports:
       - "27017:27017"
     volumes:
@@ -14,9 +11,10 @@ services:
     build:
       context: .
     container_name: task_manager_backend
+    restart: always
     environment:
       - NODE_ENV=development
-      - MONGO_URI=mongodb://mongo:27017/TASK_MANAGER
+      - MONGO_URI=${MONGO_URI}
     ports:
       - "5000:5000"
     env_file:
@@ -24,7 +22,6 @@ services:
     depends_on:
       - mongo
     volumes:
-      - .:/usr/src/app
       - /usr/src/app/node_modules
 
 volumes:
