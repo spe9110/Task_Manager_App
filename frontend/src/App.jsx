@@ -5,6 +5,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ErrorBoundary from "./components/ErrorBoundary";
+import PageNotFound from "./pages/PageNotFound";
 
 // ✅ Lazy loaded pages
 const Home = lazy(() => import("./pages/Home"));
@@ -52,6 +53,7 @@ function App() {
                 <Route path="single-task/:id" element={<SingleTask />} />
                 <Route path="update-task/:id" element={<UpdateTask />} />
                 <Route path="profile" element={<Profile />} />
+                <Route path="*" element={<PageNotFound />} />
               </Route>
             </Route>
           </Routes>
