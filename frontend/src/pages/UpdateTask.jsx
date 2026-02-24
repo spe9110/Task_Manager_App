@@ -107,7 +107,7 @@ const UpdateTask = ({ closeModal }) => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)} className='bg-white w-full max-w-[5vw] h-auto text-black'>
+      <form onSubmit={handleSubmit(onSubmit)} className='bg-white w-full max-w-[50%vw] h-auto text-black'>
         {/* form title */}
         <div className='bg-neutral-50 flex justify-between items-center w-full h-[6rem] px-[32px] '>
             <h1 className='text-black text-2xl font-bold'>Update Task</h1>
